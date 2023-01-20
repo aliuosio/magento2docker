@@ -22,9 +22,10 @@ setHostConfig() {
   sudo systemctl daemon-reload
 }
 
-action=$1
 image="magento2docker"
+action=$1
 tag=$2
+MAGENTO_VERSION=$3
 
 setHostConfig
 if [ "$action" = "build" ]; then
