@@ -13,7 +13,7 @@ xdebugSetup() {
 }
 
 xdebugComfig() {
-  cat <<EOF >/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+  sudo cat <<EOF >/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 # xdebug.mode=debug,develop,trace,coverage,profile
   xdebug.mode=debug,develop
   xdebug.cli_color=1
