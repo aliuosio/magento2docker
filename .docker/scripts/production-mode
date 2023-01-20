@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e
+
+removeComposerCache() {
+  folders=("/root/.composer" "/.composer" "/var/www/.composer" "/home/www-data/.composer")
+  for path in "${folders[@]}"; do
+    if [ -d "$path" ]; then
+      rm -rf "$path"
+    fi
+  done
+}
+
+php -d memory_limit=-1 bin/magento setup:di:compile
+php -d memory_limit=-1 bin/magento setup:static-content:deploy -f
+bin/magento deploy:mode:set --skip-compilation production
+php -d memory_limit=-1 bin/magento xigen:cachewarmer:runner warm
+removeComposerCache
+chown -R www-data:www-data .

@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+
+  main:
+    container_name: ${NAMESPACE}_main
+    image: osioaliu/magento2docker:dev
+    sysctls:
+      net.core.somaxconn: 65536
+    user: ${UID_GID}
+    volumes:
+      - ~/.composer:/root/.composer:delegated
+      - /home/projects_no-crypt/magento:${WORKDIR_SERVER}:delegated
+
+#  rabbitmq:
+#    container_name: ${NAMESPACE}_rabbitmq
+#    image: rabbitmq:${RABBITMQ_VERSION}
+#    environment:
+#      RABBITMQ_DEFAULT_USER: admin
+#      RABBITMQ_DEFAULT_PASS: admin20173
+#    ports:
+#      - "15672:15672"
+#      - "5672:5672"7
+
+#  mailhog:
+#    container_name: ${NAMESPACE}_mailhog
+#    image: mailhog/mailhog:${MAILHOG_VERSION}
+#    ports:
+#      - "8025:8025"
+
+#  watchtower:
+#    container_name: ${NAMESPACE}_watchtower
+#    image: containrrr/watchtower:${WATCHTOWER_VERSION}
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#    command: --interval 3600

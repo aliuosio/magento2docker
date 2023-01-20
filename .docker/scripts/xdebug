@@ -1,0 +1,33 @@
+#!/bin/bash
+
+set -e
+
+. .env
+
+xdebugSetup() {
+  apk --no-cache add autoconf g++ make linux-headers &&
+    pecl install xdebug &&
+    docker-php-ext-enable xdebug &&
+    rm -rf /tmp/pear &&
+    apk del --purge autoconf g++ make linux-headers
+}
+
+xdebugComfig() {
+  cat <<EOF >/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+# xdebug.mode=debug,develop,trace,coverage,profile
+  xdebug.mode=debug,develop
+  xdebug.cli_color=1
+  xdebug.collect_assignments=1
+  xdebug.collect_params=1
+  xdebug.max_nesting_level=512
+  xdebug.remote_handler=dbgp
+  xdebug.client_port=9003
+  xdebug.profiler_output_dir=/usr/src/app
+  xdebug.start_with_request=trigger
+  xdebug.idekey=magento2docker
+  xdebug.discover_client_host=yes
+EOF
+}
+
+xdebugComfig
+xdebugSetup
