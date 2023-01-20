@@ -15,14 +15,9 @@ The main docker image `osioaliu/magento2docker` has all applications (Nginx, PHP
   this has additinal cotainers with Mailhog, Watchtower and rabbitmq which you might need in your project commented out
   Download `https://raw.githubusercontent.com/aliuosio/magento2docker/main/docker-compose.yml`
   
-    docker exec -t magento2docker start
-
-
-> Run `docker-compose up -d` to start all containers
-> 
-> Run `docker compose exec -it main start` to install Magento 2
-> 
-> Run `docker compose exec -it main xdebug` to use xdebug with ide.key magento2docker
+    docker-compose up -d                # to start all containers
+    docker compose exec -it main start  # to install Magento 2
+    docker compose exec -it main xdebug # to use xdebug with ide.key magento2docker
 
 #### Backend
     http://<ip displayed on your console>/admin
