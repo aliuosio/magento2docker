@@ -10,7 +10,7 @@ services:
     user: ${UID_GID}
     volumes:
       - ~/.composer:/root/.composer:delegated
-      - /home/projects_no-crypt/magento:${WORKDIR_SERVER}:delegated
+      - ${WORKDIR}:${WORKDIR_SERVER}:delegated
 
 #  rabbitmq:
 #    container_name: ${NAMESPACE}_rabbitmq
