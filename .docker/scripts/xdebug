@@ -5,11 +5,11 @@ set -e
 . .env
 
 xdebugSetup() {
-  apk --no-cache add autoconf g++ make linux-headers &&
+  sudo apk --no-cache add autoconf g++ make linux-headers &&
     pecl install xdebug &&
     docker-php-ext-enable xdebug &&
     rm -rf /tmp/pear &&
-    apk del --purge autoconf g++ make linux-headers
+    sudo apk del --purge autoconf g++ make linux-headers
 }
 
 xdebugComfig() {
