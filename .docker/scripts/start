@@ -28,7 +28,7 @@ composerInstallPackages() {
 }
 
 removeComposerCache() {
-  folders=("/root/.composer" "/.composer" "/var/www/.composer" "/home/www-data/.composer")
+  folders=("/root/.composer" "/.composer" "/var/www/.composer" "/var/www/html/.composer")
   for path in "${folders[@]}"; do
     if [ -d "$path" ]; then
       rm -rf "$path"

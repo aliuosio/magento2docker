@@ -22,9 +22,9 @@ fi
 
 FROM php:8.1.14-fpm-alpine3.17
 ARG WEBUSER=www-data
-ARG WEBGROUP=www-data
-ARG COMPOSE_USER=1000
+ARG WEBGROUP=$WEBUSER
 ARG WORKDIR_SERVER=/var/www/html
+ARG COMPOSER_USER=1000
 LABEL maintainer="Osiozekhai Aliu"
 RUN apk update && apk upgrade
 RUN apk add --no-cache --virtual build-dependencies libc-dev libxslt-dev freetype-dev libjpeg-turbo-dev  \
@@ -55,16 +55,15 @@ RUN apk add --no-cache --virtual build-dependencies libc-dev libxslt-dev freetyp
     && addgroup -S nginx \
     && adduser -S --no-create-home nginx -G nginx \
     && echo "JAVA_HOME=/usr/lib/jvm/java-11-openjdk/bin/java" | tee -a /etc/profile \
-    && source /etc/profile \
-    && echo "$WEBUSER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
-    && echo "$COMPOSE_USER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
+    && source /etc/profile
+
+RUN apk add --no-cache shadow \
     && curl -SsL https://github.com/boxboat/fixuid/releases/download/v0.5.1/fixuid-0.5.1-linux-amd64.tar.gz | tar -C /usr/local/bin -xzf -  \
     && chmod 4755 /usr/local/bin/fixuid \
     && mkdir -p /etc/fixuid \
+    && usermod -p "" $WEBUSER \
     && printf "user: $WEBUSER\ngroup: $WEBGROUP\n" >> /etc/fixuid/config.yml \
-    && printf "user: $COMPOSE_USER\ngroup: $WEBGROUP\n" >> /etc/fixuid/config.yml \
-    && addgroup -S $COMPOSE_USER \
-    && adduser --disabled-password -sS $COMPOSE_USER -G $WEBGROUP \
+    && echo "$WEBUSER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
     && echo "Defaults  lecture=\"never\"" >> /etc/sudoers
 
 COPY --from=composer --chown=$WEBUSER:$WEBUSER $WORKDIR_SERVER $WORKDIR_SERVER
@@ -106,4 +105,4 @@ RUN chmod +x /usr/share/elasticsearch/bin/elasticsearch \
 WORKDIR $WORKDIR_SERVER
 EXPOSE 80
 USER $WEBUSER:$WEBGROUP
-CMD [ "sudo", "supervisord-wrapper" ]
+CMD [ "fixuid", "sudo", "supervisord-wrapper" ]
