@@ -34,5 +34,5 @@ elif [ "$action" = "xdebug" ]; then
 else
   getLogo
   docker run --rm -dt --name "$image" osioaliu/"$image":latest
-  # docker exec -it "$image" start
+  docker exec -it "$image" start
 fi
