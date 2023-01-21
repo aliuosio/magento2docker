@@ -9,7 +9,6 @@ services:
       net.core.somaxconn: 65536
     user: ${UID_GID}
     volumes:
-      - ~/.composer:/root/.composer:delegated
       - ${WORKDIR}:${WORKDIR_SERVER}:delegated
 
 #  rabbitmq:
