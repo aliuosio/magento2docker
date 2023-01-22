@@ -32,7 +32,7 @@ RUN apk add --no-cache --virtual build-dependencies libc-dev libxslt-dev freetyp
     && apk add --no-cache --virtual .php-deps make \
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS zlib-dev gettext-dev \
     g++ curl-dev wget ca-certificates gnupg openssl \
-    && apk add --no-cache supervisor pwgen gettext openjdk11 su-exec pcre2-dev bash sudo icu-dev git \
+    && apk add --no-cache supervisor pwgen gettext openjdk11 su-exec pcre2-dev bash sudo icu-dev git shadow \
     && docker-php-ext-configure hash --with-mhash \
     && docker-php-ext-configure gd --with-webp --with-jpeg --with-freetype \
     && docker-php-ext-install gd bcmath intl gettext pdo_mysql soap sockets xsl zip opcache \
@@ -55,16 +55,14 @@ RUN apk add --no-cache --virtual build-dependencies libc-dev libxslt-dev freetyp
     && addgroup -S nginx \
     && adduser -S --no-create-home nginx -G nginx \
     && echo "JAVA_HOME=/usr/lib/jvm/java-11-openjdk/bin/java" | tee -a /etc/profile \
-    && source /etc/profile
-
-RUN apk add --no-cache shadow \
     && curl -SsL https://github.com/boxboat/fixuid/releases/download/v0.5.1/fixuid-0.5.1-linux-amd64.tar.gz | tar -C /usr/local/bin -xzf -  \
     && chmod 4755 /usr/local/bin/fixuid \
     && mkdir -p /etc/fixuid \
     && usermod -p "" $WEBUSER \
     && printf "user: $WEBUSER\ngroup: $WEBGROUP\n" >> /etc/fixuid/config.yml \
     && echo "$WEBUSER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
-    && echo "Defaults  lecture=\"never\"" >> /etc/sudoers
+    && echo "Defaults  lecture=\"never\"" >> /etc/sudoers \
+    && source /etc/profile
 
 COPY --from=composer --chown=$WEBUSER:$WEBUSER $WORKDIR_SERVER $WORKDIR_SERVER
 COPY --from=composer --chown=redis:redis /etc/sentinel.conf /etc/sentinel.conf
