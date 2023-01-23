@@ -7,7 +7,7 @@ services:
     image: osioaliu/magento2docker:dev
     sysctls:
       net.core.somaxconn: 65536
-    user: ${UID_GID}
+    user: 1000:1000
     volumes:
       - ${PWD}/htdocs:/var/www/html:delegated
 
