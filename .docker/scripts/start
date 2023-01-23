@@ -104,9 +104,7 @@ if [[ ! -f "app/etc/env.php" || "$(check_db_has_no_tables)" == "true" ]]; then
   magentoInstall "$hostname"
   setPerformanceVars
   bin/magento module:disable -c Magento_TwoFactorAuth
-  if [ -z "$1" ]; then
-    bin/magento module:enable Yireo_Webp2 Yireo_NextGenImages
-  fi
+  bin/magento module:enable Yireo_Webp2 Yireo_NextGenImages
   bin/magento ind:rei
   bin/magento cache:flush
 else
