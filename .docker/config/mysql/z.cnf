@@ -169,7 +169,7 @@ innodb_file_per_table = 1
 innodb_read_io_threads = 8
 innodb_write_io_threads = 8
 innodb_buffer_pool_instances = 2
-innodb_buffer_pool_size = 2G
+innodb_buffer_pool_size = 1G
 innodb_stats_on_metadata = 0
 innodb_autoextend_increment = 512
 
