@@ -86,6 +86,12 @@ setBaseUrl() {
   bin/magento config:set web/unsecure/base_url "http://$1/"
 }
 
+checkIfDBhasTables() {
+  SQL_EXISTS=$(printf 'SHOW TABLES LIKE "%s"' "core_config_data")
+  SQL=$(mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "$SQL_EXISTS" "$MYSQL_DATABASE")
+  [[ $SQL ]] && return 1 || return 0
+}
+
 if [ -f "composer.json" ]; then
   composerInstallPackages
 else
@@ -95,7 +101,7 @@ fi
 
 sleep 15
 hostname="$(hostname -i)"
-if [ ! -f "app/etc/env.php" ]; then
+if [[ ! -f "app/etc/env.php" || $(checkIfDBhasTables) == 0 ]]; then
   magentoInstall "$hostname"
   setPerformanceVars
   bin/magento module:disable -c Magento_TwoFactorAuth
@@ -104,9 +110,10 @@ if [ ! -f "app/etc/env.php" ]; then
   fi
   bin/magento ind:rei
   bin/magento cache:flush
+else
+  setBaseUrl "$hostname"
 fi
 
-setBaseUrl "$hostname"
 showSuccess "$hostname"
 endAll=$(date +%s)
 echo "Setup Time: $((endAll - startAll)) Sec"
