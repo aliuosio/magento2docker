@@ -38,7 +38,7 @@ removeComposerCache() {
 
 magentoInstall() {
   bin/magento setup:install --base-url-secure=https://"$1"/ \
-    --db-host=/run/mysqld/mysqld.sock --db-name="$MYSQL_DATABASE" --db-user=root --db-password="$MYSQL_ROOT_PASSWORD" \
+    --db-host=/run/mysqld/mysqld.sock --db-name="$MYSQL_DATABASE" --db-user="root" --db-password="$MYSQL_ROOT_PASSWORD" \
     --backend-frontname=admin --admin-lastname="$ADMIN_NAME" --admin-firstname="$ADMIN_SURNAME" \
     --admin-email="$ADMIN_EMAIL" --admin-user="$ADMIN_USER" --admin-password="$ADMIN_PASS" \
     --page-cache=redis --page-cache-redis-server="$REDIS_SOCK" --page-cache-redis-db=0 \
@@ -86,10 +86,9 @@ setBaseUrl() {
   bin/magento config:set web/unsecure/base_url "http://$1/"
 }
 
-checkIfDBhasTables() {
-  SQL_EXISTS=$(printf 'SHOW TABLES LIKE "%s"' "core_config_data")
-  SQL=$(mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "$SQL_EXISTS" "$MYSQL_DATABASE")
-  [[ $SQL ]] && return 1 || return 0
+check_db_has_no_tables() {
+  SQL="USE $MYSQL_DATABASE; SHOW TABLES"
+  mysql -u "root" -p"$MYSQL_ROOT_PASSWORD" -e "$SQL" >/dev/null 2>&1 && echo "true" || echo "false"
 }
 
 if [ -f "composer.json" ]; then
@@ -101,7 +100,7 @@ fi
 
 sleep 15
 hostname="$(hostname -i)"
-if [[ ! -f "app/etc/env.php" || $(checkIfDBhasTables) == 0 ]]; then
+if [[ ! -f "app/etc/env.php" || "$(check_db_has_no_tables)" == "true" ]]; then
   magentoInstall "$hostname"
   setPerformanceVars
   bin/magento module:disable -c Magento_TwoFactorAuth
