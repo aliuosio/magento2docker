@@ -95,16 +95,16 @@ fi
 
 sleep 15
 hostname="$(hostname -i)"
+
 if [[ ! -f "app/etc/env.php" ]]; then
   magentoInstall "$hostname"
   setPerformanceVars
   bin/magento module:disable -c Magento_TwoFactorAuth
   bin/magento ind:rei
   bin/magento cache:flush
-else
-  setBaseUrl "$hostname"
 fi
 
+setBaseUrl "$hostname"
 showSuccess "$hostname"
 endAll=$(date +%s)
 echo "Setup Time: $((endAll - startAll)) Sec"
