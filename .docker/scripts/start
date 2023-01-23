@@ -86,11 +86,6 @@ setBaseUrl() {
   bin/magento config:set web/unsecure/base_url "http://$1/"
 }
 
-check_db_has_no_tables() {
-  SQL="USE $MYSQL_DATABASE; SHOW TABLES"
-  mysql -u "root" -p"$MYSQL_ROOT_PASSWORD" -e "$SQL" >/dev/null 2>&1 && echo "true" || echo "false"
-}
-
 if [ -f "composer.json" ]; then
   composerInstallPackages
 else
@@ -100,7 +95,7 @@ fi
 
 sleep 15
 hostname="$(hostname -i)"
-if [[ ! -f "app/etc/env.php" || "$(check_db_has_no_tables)" == "true" ]]; then
+if [[ ! -f "app/etc/env.php" ]]; then
   magentoInstall "$hostname"
   setPerformanceVars
   bin/magento module:disable -c Magento_TwoFactorAuth
