@@ -3,13 +3,13 @@ version: '3.8'
 services:
 
   main:
-    container_name: ${NAMESPACE}_main
+    container_name: magento2docker_main
     image: osioaliu/magento2docker:dev
     sysctls:
       net.core.somaxconn: 65536
     user: ${UID_GID}
     volumes:
-      - ${WORKDIR}:${WORKDIR_SERVER}:delegated
+      - ${PWD}/htdocs:/var/www/html:delegated
 
 #  rabbitmq:
 #    container_name: ${NAMESPACE}_rabbitmq
