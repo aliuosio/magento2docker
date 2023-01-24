@@ -3,6 +3,7 @@
 set -e
 
 . .env
+FILE=/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 xdebugSetup() {
   sudo apk --no-cache add autoconf g++ make linux-headers &&
@@ -13,7 +14,6 @@ xdebugSetup() {
 }
 
 xdebugComfig() {
-  mkdir -p /usr/local/etc/php/conf.d/
   VAR=$(
     cat <<'END_HEREDOC'
 # xdebug.mode=debug,develop,trace,coverage,profile
@@ -31,8 +31,10 @@ xdebug.discover_client_host=yes
 END_HEREDOC
   )
 
-  echo "$VAR" | sudo tee -a "/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini"
+  echo "$VAR" | sudo tee -a $FILE
 }
 
-xdebugComfig
-xdebugSetup
+if [[ ! -f $FILE ]]; then
+  xdebugSetup
+  xdebugComfig
+fi
