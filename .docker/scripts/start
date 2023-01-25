@@ -87,12 +87,17 @@ setBaseUrl() {
 }
 
 check_db_has_no_tables() {
-  SQL="USE $MYSQL_DATABASE; SHOW TABLES"
-  mysql -u "root" -p"$MYSQL_ROOT_PASSWORD" -e "$SQL" >/dev/null 2>&1 && echo "true" || echo "false"
+  TABLE="core_config_data"
+  SQL="select count(*) as tablecount from information_schema.tables WHERE table_schema='${MYSQL_DATABASE}' and table_name='${TABLE}'"
+  dbtest=$(mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -s -N -e "$SQL")
+
+  if [[ "$dbtest" != 1 ]]; then
+    return 0
+  else
+    return 1
+  fi
 }
 
-FILE_ENV="app/etc/env.php"
-HOSTNAME="$(hostname -i)"
 
 removeMagentoFilesToReinstall() {
   local FILES=(var/composer_home var/log var/page_cache var/session var/view_preprocessed app/etc/config.php app/etc/env.php)
@@ -103,8 +108,12 @@ removeMagentoFilesToReinstall() {
   done
 }
 
+
 sleep 10
-if [[ "$(check_db_has_no_tables)" == "true" ]]; then
+FILE_ENV="app/etc/env.php"
+HOSTNAME="$(hostname -i)"
+
+if [[ $(check_db_has_no_tables) == 1 ]]; then
   removeMagentoFilesToReinstall
 fi
 if [ -f "composer.json" ]; then
