@@ -32,7 +32,7 @@ RUN apk add --no-cache --virtual build-dependencies libc-dev libxslt-dev freetyp
     && apk add --no-cache --virtual .php-deps make \
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS zlib-dev gettext-dev \
     g++ curl-dev wget ca-certificates gnupg openssl \
-    && apk add --no-cache supervisor pwgen gettext openjdk11 su-exec pcre2-dev bash sudo icu-dev git shadow \
+    && apk add --no-cache supervisor pwgen gettext openjdk11 su-exec pcre2-dev bash sudo icu-dev shadow \
     && docker-php-ext-configure hash --with-mhash \
     && docker-php-ext-configure gd --with-webp --with-jpeg --with-freetype \
     && docker-php-ext-install gd bcmath intl gettext pdo_mysql soap sockets xsl zip opcache \
