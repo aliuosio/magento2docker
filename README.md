@@ -17,7 +17,7 @@ The main docker image `osioaliu/magento2docker` has all applications (Nginx, PHP
   
     docker-compose up -d                # to start all containers
     docker compose exec -it main start  # to install Magento 2
-    docker compose exec -it main xdebug # to use xdebug with ide.key magento2docker
+> the image with the `dev` tag has xdebug installed with `magento2docker` as idekey
 
 #### Backend
     http://<ip displayed on your console>/admin

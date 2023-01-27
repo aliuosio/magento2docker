@@ -4,7 +4,7 @@ RUN apk add --no-cache redis
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer \
     && chmod +x -R /usr/local/bin/
 ARG MODE=$MODE
-RUN if [ "$MODE" = "latest" ] ; then  \
+RUN if [ "$MODE" = "latest" ]; then \
     cd /var/www/html \
     && composer create-project --remove-vcs --ignore-platform-reqs --no-progress \
       --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:2.4.5-p1 . \
@@ -64,6 +64,14 @@ RUN apk add --no-cache --virtual build-dependencies libc-dev libxslt-dev freetyp
     && echo "Defaults  lecture=\"never\"" >> /etc/sudoers \
     && source /etc/profile
 
+RUN if [ "$MODE" = "dev" ]; then \
+    apk --no-cache add autoconf g++ make linux-headers \
+    && pecl install xdebug \
+    && docker-php-ext-enable xdebug \
+    && rm -rf /tmp/pear \
+    && apk del --purge autoconf g++ make linux-headers; \
+fi
+
 COPY --from=composer --chown=$WEBUSER:$WEBUSER $WORKDIR_SERVER $WORKDIR_SERVER
 COPY --from=composer --chown=redis:redis /etc/sentinel.conf /etc/sentinel.conf
 COPY --from=composer --chown=redis:redis /var/log/redis /var/log/redis
@@ -87,6 +95,7 @@ COPY .docker/config/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY .docker/config/nginx/cert_key.key /etc/nginx/ssl/cert_key.key
 COPY .docker/config/nginx/cert.crt /etc/nginx/ssl/cert.crt
 COPY .docker/config/php/docker-php-ext-php.ini /usr/local/etc/php/conf.d/docker-php-ext-php.ini
+COPY .docker/config/php/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 COPY .docker/config/php/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
 COPY .docker/config/mysql/z.cnf /etc/mysql/z.cnf
 COPY .docker/config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
