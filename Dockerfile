@@ -1,11 +1,16 @@
-FROM php:8.1.14-fpm-alpine3.17 as composer
+ARG MODE=$MODE
+ARG WORKDIR_SERVER=/var/www/html
+
+FROM php:8.1.14-fpm-alpine3.17 as builder
+LABEL maintainer="Osiozekhai Aliu"
+ARG MODE
+ARG WORKDIR_SERVER
 RUN apk update
 RUN apk add --no-cache redis
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer \
     && chmod +x -R /usr/local/bin/
-ARG MODE=$MODE
 RUN if [ "$MODE" = "latest" ]; then \
-    cd /var/www/html \
+    cd $WORKDIR_SERVER \
     && composer create-project --remove-vcs --ignore-platform-reqs --no-progress \
       --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:2.4.5-p1 . \
     && composer req --ignore-platform-reqs --no-progress \
@@ -21,12 +26,10 @@ fi
 
 
 FROM php:8.1.14-fpm-alpine3.17
-ARG MODE=$MODE
+ARG MODE
+ARG WORKDIR_SERVER
 ARG WEBUSER=www-data
 ARG WEBGROUP=$WEBUSER
-ARG WORKDIR_SERVER=/var/www/html
-ARG COMPOSER_USER=1000
-LABEL maintainer="Osiozekhai Aliu"
 RUN apk update && apk upgrade
 RUN apk add --no-cache --virtual build-dependencies libc-dev libxslt-dev freetype-dev libjpeg-turbo-dev  \
     libpng-dev libzip-dev libwebp-dev \
@@ -45,8 +48,6 @@ RUN apk add --no-cache --virtual build-dependencies libc-dev libxslt-dev freetyp
     && apk update \
     && apk add --no-cache mariadb=10.4.25-r0 mariadb-client=10.4.25-r0 mariadb-server-utils=10.4.25-r0 \
     && apk del --purge .build-deps .build-deps $PHPIZE_DEPS \
-    && apk del --purge openjdk11-demos \
-    && apk del --purge openjdk11-doc \
     && rm -rf /var/cache/apk/* \
     && rm -rf /tmp/* \
     && addgroup -S elasticsearch \
@@ -67,20 +68,21 @@ RUN apk add --no-cache --virtual build-dependencies libc-dev libxslt-dev freetyp
 
 RUN if [ "$MODE" = "dev" ]; then \
     apk --no-cache add autoconf g++ make linux-headers \
-    && pecl install xdebug \
+    && pecl channel-update pecl.php.net \
+    && pecl install -o -f xdebug \
     && docker-php-ext-enable xdebug \
-    && docker-php-source delete \
     && rm -rf /tmp/pear \
-    && apk del --purge autoconf g++ make linux-headers; \
+    && apk del --purge autoconf g++ make linux-headers \
+    && rm -rf /tmp/*; \
 fi
 
-COPY --from=composer --chown=$WEBUSER:$WEBUSER $WORKDIR_SERVER $WORKDIR_SERVER
-COPY --from=composer --chown=redis:redis /etc/sentinel.conf /etc/sentinel.conf
-COPY --from=composer --chown=redis:redis /var/log/redis /var/log/redis
-COPY --from=composer --chown=redis:redis /var/lib/redis /var/lib/redis
-COPY --from=composer --chown=redis:redis /run/redis /run/redis
-COPY --from=composer --chown=redis:redis /usr/bin/redis-server /usr/bin/redis-server
-COPY --from=composer /usr/local/bin/composer /usr/local/bin/composer
+COPY --from=builder --chown=$WEBUSER:$WEBUSER $WORKDIR_SERVER $WORKDIR_SERVER
+COPY --from=builder --chown=redis:redis /etc/sentinel.conf /etc/sentinel.conf
+COPY --from=builder --chown=redis:redis /var/log/redis /var/log/redis
+COPY --from=builder --chown=redis:redis /var/lib/redis /var/lib/redis
+COPY --from=builder --chown=redis:redis /run/redis /run/redis
+COPY --from=builder --chown=redis:redis /usr/bin/redis-server /usr/bin/redis-server
+COPY --from=builder /usr/local/bin/composer /usr/local/bin/composer
 COPY --from=blacktop/elasticsearch:7.5 --chown=elasticsearch:elasticsearch /usr/share/elasticsearch /usr/share/elasticsearch
 COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /usr/sbin/nginx /usr/sbin/nginx
 COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /usr/share/nginx /usr/share/nginx
