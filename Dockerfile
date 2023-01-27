@@ -99,7 +99,7 @@ COPY .docker/config/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY .docker/config/nginx/cert_key.key /etc/nginx/ssl/cert_key.key
 COPY .docker/config/nginx/cert.crt /etc/nginx/ssl/cert.crt
 COPY .docker/config/php/docker-php-ext-php.ini /usr/local/etc/php/conf.d/docker-php-ext-php.ini
-COPY .docker/config/php/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+COPY .docker/config/php/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 COPY .docker/config/php/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
 COPY .docker/config/mysql/z.cnf /etc/mysql/z.cnf
 COPY .docker/config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
