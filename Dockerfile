@@ -21,6 +21,7 @@ fi
 
 
 FROM php:8.1.14-fpm-alpine3.17
+ARG MODE=$MODE
 ARG WEBUSER=www-data
 ARG WEBGROUP=$WEBUSER
 ARG WORKDIR_SERVER=/var/www/html
@@ -68,6 +69,7 @@ RUN if [ "$MODE" = "dev" ]; then \
     apk --no-cache add autoconf g++ make linux-headers \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
+    && docker-php-source delete \
     && rm -rf /tmp/pear \
     && apk del --purge autoconf g++ make linux-headers; \
 fi
