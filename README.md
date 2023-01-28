@@ -9,7 +9,9 @@ The main docker image `osioaliu/magento2docker` has all applications (Nginx, PHP
     docker run --rm -dt --name magento2docker osioaliu/magento2docker
     docker exec -t magento2docker start
 
-> next time just start the server with command: magento2docker 
+> there is a `docker-sync.yml` config to use on MacOS to speed up volume syncronisation due to drawbacks with docker on MacOS. 
+More usage can be found here: http://docker-sync.io/
+> Install Guide 
 
 ### or start in `docker-compose.yml` to use with own project
   this has additinal cotainers with Mailhog, Watchtower and rabbitmq which you might need in your project commented out
