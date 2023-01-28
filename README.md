@@ -10,7 +10,7 @@ The main docker image `osioaliu/magento2docker` has all applications (Nginx, PHP
     docker exec -t magento2docker start
 
 > there is a `docker-sync.yml` config to use on MacOS to speed up volume synchronisation due to drawbacks with docker on MacOS. 
-More usage can be found here: http://docker-sync.io/
+More Information about installation and Usage can be found here: http://docker-sync.io/
 > Install Guide 
 
 ### or start in `docker-compose.yml` to use with own project
