@@ -19,7 +19,7 @@ More Information about installation and Usage can be found here: http://docker-s
   
     docker-compose up -d                # to start all containers
     docker compose exec -it main start  # to install Magento 2
-> the image with the `dev` tag has xdebug installed with `magento2docker` as idekey
+> the image with the `dev` tag used in `docker-compose.yml has xdebug installed with `magento2docker` as idekey
 
 #### Backend
     http://<ip displayed on your console>/admin
