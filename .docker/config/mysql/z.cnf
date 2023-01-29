@@ -10,11 +10,15 @@ default-character-set = utf8mb4
 [mysqld]
 character-set-server = utf8mb4
 collation-server = utf8mb4_unicode_ci
-table_definition_cache = 600
+table_definition_cache = 622
 
 # user added
 performance_schema = on
 
 innodb_stats_on_metadata = 0
-innodb_log_file_size = 250M
-innodb_buffer_pool_size = 1G
+innodb_log_file_size = 384M
+innodb_buffer_pool_size = 3G
+innodb_io_capacity=1000
+
+join_buffer_size = 4096K
+read_rnd_buffer_size = 128K
