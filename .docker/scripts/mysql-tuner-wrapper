@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+. /usr/local/bin/.env
+
+cd /usr/local/bin/
+apk add --no-cache perl-doc
+wget http://mysqltuner.pl/ -O mysqltuner.pl; \
+curl "https://codeload.github.com/FromDual/mariadb-sys/zip/master" > mariadb-sys.zip
+unzip mariadb-sys.zip
+cd mariadb-sys-master/
+mysql -u root -p"$MYSQL_ROOT_PASSWORD" < ./sys_10.sql
+chmod +x mysqltuner.pl
+perl mysqltuner.pl --user root --pass "$MYSQL_ROOT_PASSWORD"
