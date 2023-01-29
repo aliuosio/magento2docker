@@ -67,14 +67,13 @@ RUN apk add --no-cache --virtual build-dependencies libc-dev libxslt-dev freetyp
     && source /etc/profile
 
 RUN if [ "$MODE" = "dev" ]; then \
-    apk add --no-cache perl-doc autoconf g++ make linux-headers \
+    apk add --no-cache autoconf g++ make linux-headers \
     && pecl channel-update pecl.php.net \
     && pecl install -o -f xdebug \
     && docker-php-ext-enable xdebug \
     && rm -rf /tmp/pear \
     && apk del --purge autoconf g++ make linux-headers \
-    && rm -rf /tmp/* \
-    && wget http://mysqltuner.pl/ -O /usr/local/bin/mysqltuner.pl; \
+    && rm -rf /tmp/*; \
 fi
 
 COPY --from=builder --chown=$WEBUSER:$WEBUSER $WORKDIR_SERVER $WORKDIR_SERVER
