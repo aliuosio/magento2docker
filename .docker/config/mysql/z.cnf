@@ -27,7 +27,7 @@ skip-external-locking
 bind-address	= 127.0.0.1
 
 # Fine Tuning
-max_connections		= 800
+max_connections		= 200
 connect_timeout		= 5
 wait_timeout		= 600
 max_allowed_packet	= 256M
@@ -61,13 +61,13 @@ innodb_stats_on_metadata = 0
 innodb_file_per_table = 1
 
 # Query Cache Configuration
-query_cache_limit		= 4M
-query_cache_size		= 128M
-query_cache_type		= 1
+query_cache_limit		= 63MB
+query_cache_size		= 64MB
+query_cache_type		= 0
 
 # Logging and Replication
 general_log             = 0
-slow_query_log=1
+slow_query_log=0
 slow_query_log_file	= /var/log/mysql/mariadb-slow.log
 long_query_time = 2
 log_slow_verbosity	= query_plan
