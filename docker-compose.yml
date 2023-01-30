@@ -10,6 +10,14 @@ services:
     user: 1000:1000
     volumes:
       - ${PWD}/htdocs:/var/www/html:delegated
+      - type: tmpfs
+        target: /var/www/html/generated
+      - type: tmpfs
+        target: /var/www/html/var/tmp
+      - type: tmpfs
+        target: /var/www/html/var/view_preprocessed
+      - type: tmpfs
+        target: /var/www/html/pub/static
 
 #  rabbitmq:
 #    container_name: ${NAMESPACE}_rabbitmq
