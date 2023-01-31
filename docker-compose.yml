@@ -10,6 +10,7 @@ services:
     user: 1000:1000
     volumes:
       - ${PWD}/htdocs/app:/var/www/html/app:delegated
+      - ${PWD}/htdocs/dev:/var/www/html/dev:delegated
       - ${PWD}/htdocs/composer.json:/var/www/html/composer.json:cached
       - ${PWD}/htdocs/vendor:/var/www/html/vendor:cached
 
