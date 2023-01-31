@@ -20,14 +20,13 @@ If you want to use this setup with your own project, you can use the `docker-com
 This file includes additional containers with Mailhog, Watchtower, and Rabbitmq 
 which you may find useful for your project. These containers are currently commented out.
 
-### 1. Download the [docker-compose.yml](https://raw.githubusercontent.com/aliuosio/magento2docker/main/docker-compose.yml) file
-### 2. Run the following command to start all containers:
+    git clone https://github.com/aliuosio/magento2docker.git
+    cd magento2docker
+    chmod +x bin/start
+    bin/start
 
-    docker-compose up -d
-
-### 3. Run the following command to install Magento 2:
-
-    docker compose exec -it main start
+Only the `app/code` folder is mapped as a volume due perfomance.
+The rest of the magento files are copied to a folder parralel to htdocs so you can add it as a library to your IDE
 
 > The image with the `dev` tag used in the `docker-compose.yml` has xdebug installed with magento2docker as the idekey.
 

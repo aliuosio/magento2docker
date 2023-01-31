@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+sudo sysctl vm.overcommit_memory=1
+sudo echo never /sys/kernel/mm/transparent_hugepage/enabled
+sudo sysctl vm.max_map_count=262144
+sudo systemctl daemon-reload
+
+# docker compose down -v --remove-orphans
+docker compose up -d
+docker cp .docker/config/php/composer.json magento2docker_main:/var/www/html/composer.json
+docker compose exec main start
+sudo chown -R "$USER":"$USER" htdocs
+docker cp magento2docker_main:/var/www/html/ root_files_in_docker
