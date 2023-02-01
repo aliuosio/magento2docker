@@ -13,7 +13,6 @@ createMagentoProject() {
 
 getComposerPackages() {
   composer req --ignore-platform-reqs \
-    magepal/magento2-gmailsmtpapp yireo/magento2-webp2 dominicwatts/cachewarmer \
     magento/module-bundle-sample-data magento/module-catalog-rule-sample-data magento/module-catalog-sample-data \
     magento/module-cms-sample-data magento/module-configurable-sample-data magento/module-customer-sample-data \
     magento/module-downloadable-sample-data magento/module-grouped-product-sample-data magento/module-msrp-sample-data \
