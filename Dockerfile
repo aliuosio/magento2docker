@@ -14,7 +14,7 @@ RUN if [ "$MODE" = "latest" ]; then \
     && composer create-project --remove-vcs --ignore-platform-reqs --no-progress \
       --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:2.4.5-p1 . \
     && composer req --ignore-platform-reqs --no-progress \
-    magepal/magento2-gmailsmtpapp yireo/magento2-webp2 dominicwatts/cachewarmer \
+    magepal/magento2-gmailsmtpapp yireo/magento2-webp2 \
     magento/module-bundle-sample-data magento/module-catalog-rule-sample-data magento/module-catalog-sample-data \
     magento/module-cms-sample-data magento/module-configurable-sample-data magento/module-customer-sample-data \
     magento/module-downloadable-sample-data magento/module-grouped-product-sample-data magento/module-msrp-sample-data \
@@ -67,7 +67,7 @@ RUN apk add --no-cache --virtual build-dependencies libc-dev libxslt-dev freetyp
     && source /etc/profile
 
 RUN if [ "$MODE" = "dev" ]; then \
-    apk add --no-cache autoconf g++ make linux-headers \
+    apk add --no-cache autoconf g++ make linux-headers yarn \
     && pecl channel-update pecl.php.net \
     && pecl install -o -f xdebug \
     && docker-php-ext-enable xdebug \
