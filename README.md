@@ -25,7 +25,7 @@ which you may find useful for your project. These containers are currently comme
     chmod +x bin/dev
     bin/dev
 
-Only the `app/code`, `vendor`, `dev`, `composer.json` foldera are mapped as a volumes due perfomance.
+Only the `app/code`, `dev`, `composer.json` foldera are mapped as a volumes due perfomance.
 The rest of the magento files are copied to a folder parralel to htdocs so you can add it as a library to your IDE
 
 > The image with the `dev` tag used in the `docker-compose.yml` has xdebug installed with magento2docker as the idekey.
