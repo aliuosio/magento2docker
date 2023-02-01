@@ -9,6 +9,6 @@ sudo systemctl daemon-reload
 
 docker compose up -d
 sudo chown -R "$USER":"$USER" htdocs
-docker compose exec -u root main bash -c "chown -R www-data:www-data app/ dev/ vendor/ composer.json"
+docker compose exec -u root main bash -c "chown -R www-data:www-data app/ dev/ composer.json"
 docker compose exec main start
 docker cp magento2docker_main:/var/www/html/ root_files_in_docker
