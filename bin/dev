@@ -2,6 +2,9 @@
 
 set -e
 
+ROOT_FOLDER=root_files_in_docker
+
+
 sudo sysctl vm.overcommit_memory=1
 sudo echo never /sys/kernel/mm/transparent_hugepage/enabled
 sudo sysctl vm.max_map_count=262144
@@ -9,6 +12,7 @@ sudo systemctl daemon-reload
 
 docker compose up -d
 sudo chown -R "$USER":"$USER" htdocs
-docker compose exec -u root main bash -c "chown -R www-data:www-data app/ dev/ composer.json"
+docker compose exec -u root main bash -c "chown -R www-data:www-data app/ dev/ vendor/ composer.json"
 docker compose exec main start
-docker cp magento2docker_main:/var/www/html/ root_files_in_docker
+docker cp magento2docker_main:/var/www/html/ $ROOT_FOLDER
+rm -rf ${ROOT_FOLDER}/app ${ROOT_FOLDER}/dev ${ROOT_FOLDER}/vendor ${ROOT_FOLDER}/composer.json

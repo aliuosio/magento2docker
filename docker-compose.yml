@@ -11,6 +11,7 @@ services:
     volumes:
       - ${PWD}/htdocs/app:/var/www/html/app:delegated
       - ${PWD}/htdocs/dev:/var/www/html/dev:delegated
+      - ${PWD}/htdocs/vendor:/var/www/html/vendor:delegated
       - ${PWD}/htdocs/composer.json:/var/www/html/composer.json:delegated
 
 #  rabbitmq:
