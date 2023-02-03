@@ -13,7 +13,7 @@ services:
       - ${PWD}/htdocs/dev:/var/www/html/dev:delegated
       - ${PWD}/htdocs/pub:/var/www/html/pub:delegated
       - ${PWD}/htdocs/composer.json:/var/www/html/composer.json:delegated
-      - ~/$USER/.composer:/home/www-data/.composer
+      - ~/$USER/.composer:/home/www-data/.composer:delegated
 
 #  rabbitmq:
 #    container_name: ${NAMESPACE}_rabbitmq
