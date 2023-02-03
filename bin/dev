@@ -16,5 +16,5 @@ docker compose exec main start
 
 if [[ ! -d $ROOT_FOLDER ]]; then
   docker cp magento2docker_main:/var/www/html/ $ROOT_FOLDER
-  rm -rf ${ROOT_FOLDER}/app ${ROOT_FOLDER}/dev ${ROOT_FOLDER}/pub ${ROOT_FOLDER}/composer.json
+  rm -rf ${ROOT_FOLDER}/app ${ROOT_FOLDER}/dev ${ROOT_FOLDER}/pub
 fi
