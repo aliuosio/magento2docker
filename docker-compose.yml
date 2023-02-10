@@ -9,11 +9,7 @@ services:
       net.core.somaxconn: 65536
     user: 1000:1000
     volumes:
-      - ${PWD}/htdocs/app:/var/www/html/app:delegated
-      - ${PWD}/htdocs/dev:/var/www/html/dev:delegated
-      - ${PWD}/htdocs/vendor:/var/www/html/vendor:delegated
-      - ${PWD}/htdocs/pub:/var/www/html/pub:delegated
-      - ${PWD}/htdocs/composer.json:/var/www/html/composer.json:delegated
+      - ${PWD}/htdocs:/var/www/html:delegated
       - ~/$USER/.composer:/home/www-data/.composer:delegated
 
 #  rabbitmq:
