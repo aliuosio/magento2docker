@@ -8,7 +8,7 @@ The main Docker image, osioaliu/magento2docker, includes all necessary applicati
 ## Magento 2 Demo
 ### 1. Run the following command to start the container:
 
-    docker run --rm -dt --name magento2docker osioaliu/magento2docker
+    docker run --rm -dt --name magento2docker osioaliu/magento2docker:latest
 
 ### 2. Execute the following command to get Magento 2 IP:
 
