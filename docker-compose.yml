@@ -9,7 +9,7 @@ services:
       net.core.somaxconn: 65536
     user: 1000:1000
     volumes:
-      - ${PWD}/htdocs:/var/www/html:delegated
+      - ${WORKDIR}:${WORKDIR_SERVER}:delegated
       - ~/$USER/.composer:/home/www-data/.composer:delegated
 
 #  rabbitmq:
