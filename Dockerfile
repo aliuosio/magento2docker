@@ -84,6 +84,7 @@ COPY --from=builder --chown=redis:redis /run/redis /run/redis
 COPY --from=builder --chown=redis:redis /usr/bin/redis-server /usr/bin/redis-server
 COPY --from=builder /usr/local/bin/composer /usr/local/bin/composer
 COPY --from=blacktop/elasticsearch:7.5 --chown=elasticsearch:elasticsearch /usr/share/elasticsearch /usr/share/elasticsearch
+
 COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /usr/sbin/nginx /usr/sbin/nginx
 COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /usr/share/nginx /usr/share/nginx
 COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /usr/share/licenses/nginx /usr/share/licenses/nginx
@@ -93,11 +94,16 @@ COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /etc/logrotate.d/nginx
 COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /etc/nginx /etc/nginx
 COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /var/cache/nginx /var/cache/nginx
 COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /var/log/nginx /var/log/nginx
-
 COPY .docker/config/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY .docker/config/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY .docker/config/nginx/cert_key.key /etc/nginx/ssl/cert_key.key
 COPY .docker/config/nginx/cert.crt /etc/nginx/ssl/cert.crt
+
+RUN if [ "$MODE" = "dev" ]; then \
+    rm -rf /usr/sbin/nginx /usr/share/nginx /usr/share/licenses/nginx /usr/lib/nginx /etc/init.d/nginx; \
+    rm -rf /etc/logrotate.d/nginx /etc/nginx /var/cache/nginx /var/log/nginx; \
+fi
+
 COPY .docker/config/php/docker-php-ext-php.ini /usr/local/etc/php/conf.d/docker-php-ext-php.ini
 COPY .docker/config/php/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 COPY .docker/config/php/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
