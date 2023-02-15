@@ -92,6 +92,10 @@ removeMagentoFilesToReinstall() {
   done
 }
 
+setContainerPermissions() {
+  sudo chown -R www-data:www-data /var/www/html
+}
+
 
 sleep 10
 FILE_ENV="app/etc/env.php"
@@ -106,11 +110,12 @@ else
   createMagentoProject
 fi
 if [[ ! -f "$FILE_ENV" ]]; then
+  setContainerPermissions
   magentoInstall "$HOSTNAME"
   setPerformanceVars
+  bin/magento module:disable -c Magento_TwoFactorAuth
   bin/magento sampledata:deploy
   bin/magento se:up
-  bin/magento module:disable -c Magento_TwoFactorAuth
   bin/magento ind:rei
   bin/magento cache:flush
   sudo bin/magento cron:install
