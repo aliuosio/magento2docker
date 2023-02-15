@@ -14,14 +14,7 @@ RUN if [ "$MODE" = "latest" ]; then \
     && composer create-project --remove-vcs --ignore-platform-reqs --no-progress \
       --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:2.4.5-p1 . \
     && composer req --ignore-platform-reqs --no-progress \
-    magepal/magento2-gmailsmtpapp yireo/magento2-webp2 dominicwatts/cachewarmer \
-    magento/module-bundle-sample-data magento/module-catalog-rule-sample-data magento/module-catalog-sample-data \
-    magento/module-cms-sample-data magento/module-configurable-sample-data magento/module-customer-sample-data \
-    magento/module-downloadable-sample-data magento/module-grouped-product-sample-data magento/module-msrp-sample-data \
-    magento/module-offline-shipping-sample-data magento/module-product-links-sample-data magento/module-review-sample-data \
-    magento/module-sales-rule-sample-data magento/module-sales-sample-data magento/module-swatches-sample-data \
-    magento/module-tax-sample-data magento/module-theme-sample-data magento/module-widget-sample-data \
-    magento/module-wishlist-sample-data magento/sample-data-media; \
+    magepal/magento2-gmailsmtpapp yireo/magento2-webp2 dominicwatts/cachewarmer; \
 fi
 
 
