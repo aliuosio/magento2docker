@@ -14,7 +14,7 @@ services:
       TZ: ${TZ}
     command: '/usr/sbin/nginx -g "daemon off; error_log /dev/stderr info;"'
     volumes:
-      - .docker/nginx/config:/etc/nginx/ssl:ro
+      - .docker/config/nginx/ssl:/etc/nginx/ssl:ro
       - .docker/config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - .docker/config/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - app_data:${WORKDIR_SERVER}:delegated
