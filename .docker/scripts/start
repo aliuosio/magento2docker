@@ -103,6 +103,9 @@ removeMagentoFilesToReinstall() {
   done
 }
 
+setContainerPermissions() {
+ sudo chown -R www-data:www-data /var/www
+}
 
 sleep 10
 FILE_ENV="app/etc/env.php"
@@ -118,6 +121,7 @@ else
   getComposerPackages
 fi
 if [[ ! -f "$FILE_ENV" ]]; then
+  setContainerPermissions
   magentoInstall "$HOSTNAME"
   setPerformanceVars
   bin/magento module:disable -c Magento_TwoFactorAuth
