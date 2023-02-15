@@ -2,15 +2,34 @@ version: '3.8'
 
 services:
 
+  nginx:
+    container_name: ${NAMESPACE}_nginx
+    image: nginx:${NGINX_VERSION}
+    depends_on:
+      - main
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      TZ: ${TZ}
+    command: '/usr/sbin/nginx -g "daemon off; error_log /dev/stderr info;"'
+    volumes:
+      - .docker/nginx/config:/etc/nginx/ssl:ro
+      - .docker/config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - .docker/config/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - app_data:${WORKDIR_SERVER}:delegated
+
   main:
-    container_name: magento2docker_main
+    container_name: ${NAMESPACE}_main
     image: osioaliu/magento2docker:dev
+    environment:
+      TZ: ${TZ}
     sysctls:
       net.core.somaxconn: 65536
     user: 1000:1000
     volumes:
-      - ${WORKDIR}:${WORKDIR_SERVER}:delegated
       - ~/$USER/.composer:/home/www-data/.composer:delegated
+      - app_data:${WORKDIR_SERVER}:delegated
 
 #  rabbitmq:
 #    container_name: ${NAMESPACE}_rabbitmq
@@ -34,3 +53,10 @@ services:
 #    volumes:
 #      - /var/run/docker.sock:/var/run/docker.sock
 #    command: --interval 3600
+
+volumes:
+  app_data:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${WORKDIR}
