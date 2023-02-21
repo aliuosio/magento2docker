@@ -8,7 +8,7 @@ startAll=$(date +%s)
 
 createMagentoProject() {
   composer create-project --ignore-platform-reqs \
-    --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:2.4.5-p1 .
+    --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:"$MAGENTO_VERSION" .
 }
 
 composerInstallPackages() {
@@ -33,7 +33,7 @@ magentoInstall() {
     --cache-backend=redis --cache-backend-redis-server="$REDIS_SOCK" --cache-backend-redis-db=1 \
     --session-save=redis --session-save-redis-host="$REDIS_SOCK" --session-save-redis-persistent-id=sess-db2 --session-save-redis-db=2 \
     --search-engine=elasticsearch7 --elasticsearch-host=127.0.0.1 --elasticsearch-port=9200 \
-    --cleanup-database --use-sample-data
+    --cleanup-database
 }
 
 setPerformanceVars() {
@@ -82,7 +82,6 @@ check_db_has_no_tables() {
   echo "$dbtest"
 }
 
-
 removeMagentoFilesToReinstall() {
   local FILES=(var/composer_home var/log var/page_cache var/session var/view_preprocessed app/etc/config.php app/etc/env.php)
   for i in "${FILES[@]}"; do
@@ -116,6 +115,7 @@ if [[ ! -f "$FILE_ENV" ]]; then
   bin/magento ind:rei
   bin/magento cache:flush
   sudo bin/magento cron:install
+  removeComposerCache
 fi
 
 setBaseUrl "$HOSTNAME"

@@ -2,6 +2,8 @@
 
 set -e
 
+source .env
+
 getLogo() {
   cat <<"EOF"
 
@@ -30,7 +32,7 @@ tag=$2
 
 setHostConfig
 if [ "$action" = "build" ]; then
-  docker build -t osioaliu/"$image":"$tag" --build-arg MODE="$tag" .
+  docker build -t osioaliu/"$image":"$tag" --build-arg MODE="$tag" MAGENTO_VERSION="$MAGENTO_VERSION"
 elif [ "$action" = "xdebug" ]; then
   docker exec -it "$image" xdebug
 else
