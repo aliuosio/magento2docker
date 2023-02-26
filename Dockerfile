@@ -16,7 +16,8 @@ RUN if [ "$MODE" = "latest" ]; then \
     && composer create-project --remove-vcs --ignore-platform-reqs --no-progress \
       --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:$MAGENTO_VERSION . \
     && composer req --ignore-platform-reqs --no-progress \
-    magepal/magento2-gmailsmtpapp yireo/magento2-webp2 dominicwatts/cachewarmer; \
+    magepal/magento2-gmailsmtpapp yireo/magento2-webp2 dominicwatts/cachewarmer \
+    && composer --no-dev --ignore-platform-reqs install; \
 fi
 
 
