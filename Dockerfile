@@ -17,12 +17,6 @@ RUN if [ "$MODE" = "latest" ]; then \
       --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:$MAGENTO_VERSION . \
     && composer req --ignore-platform-reqs --no-progress \
     magepal/magento2-gmailsmtpapp yireo/magento2-webp2 dominicwatts/cachewarmer \
-    && composer req --ignore-platform-reqs --no-progress \
-    magento/module-bundle-sample-data magento/module-catalog-rule-sample-data magento/module-catalog-sample-data \
-    magento/module-cms-sample-data magento/module-configurable-sample-data magento/module-customer-sample-data \
-    magento/module-downloadable-sample-data magento/module-grouped-product-sample-data magento/module-msrp-sample-data \
-    magento/module-offline-shipping-sample-data magento/module-product-links-sample-data magento/module-review-sample-data \
-    && composer --no-dev --ignore-platform-reqs install \
     ; \
 fi
 

@@ -6,9 +6,26 @@ startAll=$(date +%s)
 
 . .env
 
+getLogo() {
+  cat <<"EOF"
+
+
+                                          __         ___       __              __
+   ____ ___   ____ _ ____ _ ___   ____   / /_ ____  |__ \ ____/ /____   _____ / /__ ___   _____
+  / __ `__ \ / __ `// __ `// _ \ / __ \ / __// __ \ __/ // __  // __ \ / ___// //_// _ \ / ___/
+ / / / / / // /_/ // /_/ //  __// / / // /_ / /_/ // __// /_/ // /_/ // /__ / ,<  /  __// /
+/_/ /_/ /_/ \__,_/ \__, / \___//_/ /_/ \__/ \____//____/\__,_/ \____/ \___//_/|_| \___//_/
+                  /____/
+
+6
+EOF
+}
+
 createMagentoProject() {
-  composer create-project --ignore-platform-reqs \
-    --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:"$MAGENTO_VERSION" .
+  composer create-project --remove-vcs --ignore-platform-reqs --no-progress \
+    --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:"$MAGENTO_VERSION" . &&
+    composer req --ignore-platform-reqs --no-progress \
+      magepal/magento2-gmailsmtpapp yireo/magento2-webp2 dominicwatts/cachewarmer
 }
 
 composerInstallPackages() {
@@ -92,8 +109,11 @@ removeMagentoFilesToReinstall() {
 }
 
 setContainerPermissions() {
- sudo chown -R www-data:www-data /var/www
+  sudo chown -R www-data:www-data /var/www
+  chmod -R 777 /var/www/html
 }
+
+getLogo
 
 sleep 10
 FILE_ENV="app/etc/env.php"
@@ -108,13 +128,14 @@ else
   createMagentoProject
 fi
 if [[ ! -f "$FILE_ENV" ]]; then
+  setContainerPermissions
   magentoInstall "$HOSTNAME"
-  bin/magento sampledata:deploy
   setPerformanceVars
   bin/magento module:disable -c Magento_TwoFactorAuth
+  bin/magento sampledata:deploy
+  bin/magento se:up
   bin/magento ind:rei
   bin/magento cache:flush
-  sudo bin/magento cron:install
   removeComposerCache
 fi
 
