@@ -1,6 +1,6 @@
 ARG MODE=$MODE
 ARG WORKDIR_SERVER=/var/www/html
-ARG MAGENTO_VERSION=$MAGENTO_VERSION
+ARG MAGENTO_VERSION=2.4.5-p1
 
 FROM php:8.1.14-fpm-alpine3.17 as builder
 LABEL maintainer="Osiozekhai Aliu"

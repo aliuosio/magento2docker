@@ -32,7 +32,7 @@ tag=$2
 
 setHostConfig
 if [ "$action" = "build" ]; then
-  docker build -t osioaliu/"$image":"$tag" --build-arg MODE="$tag" MAGENTO_VERSION="$MAGENTO_VERSION"
+  docker build -t osioaliu/"$image":"$tag" --build-arg MODE="$tag" .
 elif [ "$action" = "xdebug" ]; then
   docker exec -it "$image" xdebug
 else
