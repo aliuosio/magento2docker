@@ -17,15 +17,22 @@ getLogo() {
 /_/ /_/ /_/ \__,_/ \__, / \___//_/ /_/ \__/ \____//____/\__,_/ \____/ \___//_/|_| \___//_/
                   /____/
 
-6
 EOF
 }
 
 createMagentoProject() {
   composer create-project --remove-vcs --ignore-platform-reqs --no-progress \
-    --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:"$MAGENTO_VERSION" . &&
-    composer req --ignore-platform-reqs --no-progress \
-      magepal/magento2-gmailsmtpapp yireo/magento2-webp2 dominicwatts/cachewarmer
+    --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:"$MAGENTO_VERSION" .;
+  composer req --ignore-platform-reqs --no-progress \
+    magepal/magento2-gmailsmtpapp yireo/magento2-webp2 dominicwatts/cachewarmer;
+}
+
+getSampleData() {
+  composer req --ignore-platform-reqs --no-progress \
+    magento/module-bundle-sample-data magento/module-catalog-rule-sample-data magento/module-catalog-sample-data \
+    magento/module-cms-sample-data magento/module-configurable-sample-data magento/module-customer-sample-data \
+    magento/module-downloadable-sample-data magento/module-grouped-product-sample-data magento/module-msrp-sample-data \
+    magento/module-offline-shipping-sample-data magento/module-product-links-sample-data magento/module-review-sample-data
 }
 
 composerInstallPackages() {
@@ -126,6 +133,7 @@ if [ -f "composer.json" ]; then
   composerInstallPackages
 else
   createMagentoProject
+  getSampleData
 fi
 if [[ ! -f "$FILE_ENV" ]]; then
   setContainerPermissions
