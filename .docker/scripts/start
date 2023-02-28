@@ -21,18 +21,10 @@ EOF
 }
 
 createMagentoProject() {
-  composer create-project --remove-vcs --ignore-platform-reqs --no-progress \
-    --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:"$MAGENTO_VERSION" .;
-  composer req --ignore-platform-reqs --no-progress \
-    magepal/magento2-gmailsmtpapp yireo/magento2-webp2 dominicwatts/cachewarmer;
-}
-
-getSampleData() {
-  composer req --ignore-platform-reqs --no-progress \
-    magento/module-bundle-sample-data magento/module-catalog-rule-sample-data magento/module-catalog-sample-data \
-    magento/module-cms-sample-data magento/module-configurable-sample-data magento/module-customer-sample-data \
-    magento/module-downloadable-sample-data magento/module-grouped-product-sample-data magento/module-msrp-sample-data \
-    magento/module-offline-shipping-sample-data magento/module-product-links-sample-data magento/module-review-sample-data
+  composer create-project --ignore-platform-reqs \
+    --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:"$MAGENTO_VERSION" .
+  composer req --ignore-platform-reqs \
+    magepal/magento2-gmailsmtpapp yireo/magento2-webp2 dominicwatts/cachewarmer
 }
 
 composerInstallPackages() {
@@ -98,7 +90,7 @@ setBaseUrl() {
   bin/magento config:set web/unsecure/base_url "http://$1/"
 }
 
-check_db_has_no_tables() {
+dbTablesCount() {
   TABLE="core_config_data"
   SQL="select count(*) as tablecount from information_schema.tables where table_schema='${MYSQL_DATABASE}' and table_name='${TABLE}'"
   dbtest=$(mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -s -N -e "$SQL")
@@ -120,34 +112,36 @@ setContainerPermissions() {
   chmod -R 777 /var/www/html
 }
 
+
 getLogo
 
 sleep 10
 FILE_ENV="app/etc/env.php"
-HOSTNAME="$(hostname -i)"
 
-if [[ $(check_db_has_no_tables) == 0 ]]; then
+if [ -z "$HOST_NAME" ]; then
+  HOST_NAME="$(hostname -i)"
+fi
+if [[ $(dbTablesCount) == 0 ]]; then
   removeMagentoFilesToReinstall
 fi
 if [ -f "composer.json" ]; then
   composerInstallPackages
 else
   createMagentoProject
-  getSampleData
 fi
 if [[ ! -f "$FILE_ENV" ]]; then
   setContainerPermissions
-  magentoInstall "$HOSTNAME"
-  setPerformanceVars
+  magentoInstall "$HOST_NAME"
   bin/magento module:disable -c Magento_TwoFactorAuth
   bin/magento sampledata:deploy
+  setPerformanceVars
   bin/magento se:up
   bin/magento ind:rei
   bin/magento cache:flush
   removeComposerCache
 fi
 
-setBaseUrl "$HOSTNAME"
-showSuccess "$HOSTNAME"
+setBaseUrl "$HOST_NAME"
+showSuccess "$HOST_NAME"
 endAll=$(date +%s)
 echo "Setup Time: $((endAll - startAll)) Sec"

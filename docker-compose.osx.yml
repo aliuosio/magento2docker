@@ -29,6 +29,7 @@ services:
     image: osioaliu/magento2docker:dev
     environment:
       TZ: ${TZ}
+      HOST_NAME: localhost
     sysctls:
       net.core.somaxconn: 65536
     user: 1000:1000
