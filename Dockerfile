@@ -1,24 +1,27 @@
 ARG MODE=$MODE
 ARG WORKDIR_SERVER=/var/www/html
+ARG MAGENTO_VERSION=2.4.5-p1
 
-FROM php:8.1.14-fpm-alpine3.17 as builder
+
+FROM php:8.1.16-fpm-alpine3.17 as builder
 LABEL maintainer="Osiozekhai Aliu"
 ARG MODE
 ARG WORKDIR_SERVER
+ARG MAGENTO_VERSION
 RUN apk update
 RUN apk add --no-cache redis
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer \
     && chmod +x -R /usr/local/bin/
 RUN if [ "$MODE" = "latest" ]; then \
     cd $WORKDIR_SERVER \
-    && composer create-project --remove-vcs --ignore-platform-reqs --no-progress \
-      --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:2.4.5-p1 . \
-    && composer req --ignore-platform-reqs --no-progress \
-    magepal/magento2-gmailsmtpapp yireo/magento2-webp2 dominicwatts/cachewarmer; \
+    && composer create-project --remove-vcs --ignore-platform-reqs \
+        --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:$MAGENTO_VERSION . \
+    && composer req --ignore-platform-reqs \
+        magepal/magento2-gmailsmtpapp yireo/magento2-webp2 dominicwatts/cachewarmer; \
 fi
 
 
-FROM php:8.1.14-fpm-alpine3.17
+FROM php:8.1.16-fpm-alpine3.17
 ARG MODE
 ARG WORKDIR_SERVER
 ARG WEBUSER=www-data

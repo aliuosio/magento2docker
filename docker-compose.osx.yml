@@ -5,6 +5,10 @@ services:
   nginx:
     container_name: ${NAMESPACE}_nginx
     image: nginx:${NGINX_VERSION}
+    networks:
+      default:
+        aliases:
+          - localhost
     depends_on:
       - main
     ports:
@@ -25,12 +29,13 @@ services:
     image: osioaliu/magento2docker:dev
     environment:
       TZ: ${TZ}
+      HOST_NAME: localhost
     sysctls:
       net.core.somaxconn: 65536
     user: 1000:1000
     volumes:
       - phpsocket:/var/run
-      - ~/$USER/.composer:/home/www-data/.composer:delegated
+      - ~/.composer:/home/www-data/.composer:delegated
       - app_data:${WORKDIR_SERVER}:delegated
 
 #  rabbitmq:

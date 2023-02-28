@@ -1,13 +1,11 @@
 #!/bin/bash
 
 set -e
-
 . .env
-
 sudo sysctl vm.overcommit_memory=1
 sudo echo never /sys/kernel/mm/transparent_hugepage/enabled
 sudo sysctl vm.max_map_count=262144
-sudo systemctl daemon-reload
+#sudo systemctl daemon-reload
 
 docker compose up -d
 sudo chown -R "$USER":"$USER" "$WORKDIR"
