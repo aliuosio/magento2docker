@@ -13,9 +13,9 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
     && chmod +x -R /usr/local/bin/
 RUN if [ "$MODE" = "latest" ]; then \
     cd $WORKDIR_SERVER \
-    && composer create-project --remove-vcs --ignore-platform-reqs --no-progress \
+    && composer create-project --remove-vcs --ignore-platform-reqs \
       --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:$MAGENTO_VERSION . \
-    && composer req --ignore-platform-reqs --no-progress \
+    && composer req --ignore-platform-reqs \
     magepal/magento2-gmailsmtpapp yireo/magento2-webp2 dominicwatts/cachewarmer \
     ; \
 fi
