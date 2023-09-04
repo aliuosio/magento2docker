@@ -41,6 +41,7 @@ services:
     environment:
       TZ: ${TZ}
       COMPOSER_CACHE_DIR: /home/www-data/.composer
+      HOME: /home/www-data
       PHP_IDE_CONFIG: "serverName=localhost"
     user: ${UID_GID}
     restart: on-failure
