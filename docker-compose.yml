@@ -173,7 +173,6 @@ services:
 volumes:
   redis_socket:
   db_socket:
-  php_socket:
   rabbitmq_data:
   db_data:
   elastic_data:
