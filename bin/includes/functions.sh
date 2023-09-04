@@ -225,7 +225,7 @@ showSuccess() {
   if [ -n "$2" ]; then
     message "Backend:\
 
-http://$1/admin\
+https://$1/admin\
 
 User: <Backend Users from Your DB Dump>\
 
@@ -234,11 +234,11 @@ Password: <Backend Users Passwords from Your DB Dump>\
 
 Frontend:\
 
-http://$1"
+https://$1"
   else
     message "Backend:\
 
-http://$1/admin\
+https://$1/admin\
 
 User: mage2_admin\
 
@@ -247,7 +247,7 @@ Password: mage2_admin123#T\
 
 Frontend:\
 
-http://$1"
+https://$1"
   fi
 
 }
