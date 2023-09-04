@@ -33,7 +33,7 @@ fi
 
 gitUpdate
 osxExtraPackages
-createFolderHost
+#createFolderHost
 setNginxVhost
 dockerRefresh
 setPermissionsContainer
@@ -43,8 +43,8 @@ sampleDataInstallMustInstall
 magentoRefresh
 setMagentoPermissions
 setMagentoCron
-setPermissionsContainer
-setPermissionsHost
+# setPermissionsContainer
+# setPermissionsHost
 
 endAll=$(date +%s)
 message "Setup Time: $((endAll - startAll)) Sec"
