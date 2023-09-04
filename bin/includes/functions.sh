@@ -336,7 +336,7 @@ setNginxVhost() {
 }
 
 composerExtraPackages() {
-  commands="composer req --dev mage2tv/magento-cache-clean && composer req yireo/magento2-webp2"
+  commands="composer req --dev mage2tv/magento-cache-clean"
   runCommand "$phpContainer '$commands'"
 }
 
