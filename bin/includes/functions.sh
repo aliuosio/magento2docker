@@ -268,8 +268,13 @@ sampleDataInstallMustInstall() {
   fi
 }
 
-MagentoTwoFactorAuthDisable() {
-  commands="bin/magento module:disable -c Magento_AdminAdobeImsTwoFactorAuth Magento_TwoFactorAuth"
+disableAdminAdobeImsTwoFactorAuth() {
+  commands="bin/magento module:disable -c Magento_AdminAdobeImsTwoFactorAuth"
+  runCommand "$phpContainer '$commands'"
+}
+
+disableTwoFactorAuth() {
+  commands="bin/magento module:disable -c Magento_TwoFactorAuth"
   runCommand "$phpContainer '$commands'"
 }
 
@@ -341,8 +346,8 @@ magentoConfigImport() {
 }
 
 magentoConfig() {
-  commands="bin/magento config:set web/secure/use_in_frontend 0 && \
-  bin/magento config:set web/secure/use_in_adminhtml 0 && \
+  commands="bin/magento config:set web/secure/use_in_frontend 1 && \
+  bin/magento config:set web/secure/use_in_adminhtml 1 && \
   bin/magento config:set catalog/search/enable_eav_indexer 1 && \
   bin/magento config:set dev/template/minify_html 1 && \
   bin/magento config:set dev/js/merge_files 1 && \
@@ -372,7 +377,7 @@ magentoPreInstall() {
 }
 
 magentoInstall() {
-  commands="bin/magento setup:install  --base-url=http://$SHOPURI/ \
+  commands="bin/magento setup:install --base-url-secure=https://$SHOPURI --base-url=http://$SHOPURI/ \
   --db-host=/var/run/mysqld/mysqld.sock --db-name=$MYSQL_DATABASE --db-user=root --db-password=$MYSQL_ROOT_PASSWORD \
   --backend-frontname=admin --admin-lastname=$ADMIN_NAME --admin-firstname=$ADMIN_SURNAME --admin-email=$ADMIN_EMAIL \
   --admin-user=$ADMIN_USER --admin-password=$ADMIN_PASS \

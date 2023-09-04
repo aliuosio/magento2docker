@@ -33,12 +33,13 @@ fi
 
 gitUpdate
 osxExtraPackages
-#createFolderHost
+# createFolderHost
 setNginxVhost
 dockerRefresh
 setPermissionsContainer
 magentoSetup
-MagentoTwoFactorAuthDisable
+# disableAdminAdobeImsTwoFactorAuth
+disableTwoFactorAuth
 sampleDataInstallMustInstall
 magentoRefresh
 setMagentoPermissions
