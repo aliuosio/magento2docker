@@ -408,5 +408,5 @@ magentoSetup() {
 
   magentoConfigImport
   magentoConfig
-  setSMTP
+  # setSMTP
 }
