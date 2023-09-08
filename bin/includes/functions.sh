@@ -348,14 +348,7 @@ magentoConfigImport() {
 magentoConfig() {
   commands="bin/magento config:set web/secure/use_in_frontend 1 && \
   bin/magento config:set web/secure/use_in_adminhtml 1 && \
-  bin/magento config:set catalog/search/enable_eav_indexer 1 && \
-  bin/magento config:set dev/template/minify_html 1 && \
-  bin/magento config:set dev/js/merge_files 1 && \
-  bin/magento config:set dev/js/enable_js_bundling 1 && \
-  bin/magento config:set dev/js/minify_files 1 && \
-  bin/magento config:set dev/js/move_script_to_bottom 1 && \
-  bin/magento config:set dev/css/merge_css_files 1 && \
-  bin/magento config:set dev/css/minify_files 1 && \
+  bin/magento config:set catalog/search/enable_eav_indexer 1
   bin/magento config:set web/seo/use_rewrites 0 && \
   bin/magento deploy:mode:set -s $DEPLOY_MODE"
 
