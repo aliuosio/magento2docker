@@ -346,8 +346,8 @@ magentoConfigImport() {
 }
 
 magentoConfig() {
-  commands="bin/magento config:set web/secure/use_in_frontend 0 && \
-  bin/magento config:set web/secure/use_in_adminhtml 0 && \
+  commands="bin/magento config:set web/secure/use_in_frontend 1 && \
+  bin/magento config:set web/secure/use_in_adminhtml 1 && \
   bin/magento config:set catalog/search/enable_eav_indexer 1
   bin/magento config:set web/seo/use_rewrites 0 && \
   bin/magento deploy:mode:set -s $DEPLOY_MODE"
