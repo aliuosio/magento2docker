@@ -225,7 +225,7 @@ showSuccess() {
   if [ -n "$2" ]; then
     message "Backend:\
 
-https://$1/admin\
+http://$1/admin\
 
 User: <Backend Users from Your DB Dump>\
 
@@ -234,11 +234,11 @@ Password: <Backend Users Passwords from Your DB Dump>\
 
 Frontend:\
 
-https://$1"
+http://$1"
   else
     message "Backend:\
 
-https://$1/admin\
+http://$1/admin\
 
 User: mage2_admin\
 
@@ -247,7 +247,7 @@ Password: mage2_admin123#T\
 
 Frontend:\
 
-https://$1"
+http://$1"
   fi
 
 }
@@ -269,7 +269,7 @@ sampleDataInstallMustInstall() {
 }
 
 MagentoTwoFactorAuthDisable() {
-  commands="bin/magento module:disable -c Magento_AdminAdobeImsTwoFactorAuth Magento_TwoFactorAuth"
+  commands="bin/magento module:disable -c Magento_TwoFactorAuth"
   runCommand "$phpContainer '$commands'"
 }
 
@@ -364,7 +364,7 @@ magentoPreInstall() {
 }
 
 magentoInstall() {
-  commands="bin/magento setup:install --base-url-secure=https://$SHOPURI/ --base-url=http://$SHOPURI/ \
+  commands="bin/magento setup:install --base-url=http://$SHOPURI/ \
   --db-host=/var/run/mysqld/mysqld.sock --db-name=$MYSQL_DATABASE --db-user=root --db-password=$MYSQL_ROOT_PASSWORD \
   --backend-frontname=admin --admin-lastname=$ADMIN_NAME --admin-firstname=$ADMIN_SURNAME --admin-email=$ADMIN_EMAIL \
   --admin-user=$ADMIN_USER --admin-password=$ADMIN_PASS \
