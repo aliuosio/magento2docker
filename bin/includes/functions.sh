@@ -268,13 +268,8 @@ sampleDataInstallMustInstall() {
   fi
 }
 
-disableAdminAdobeImsTwoFactorAuth() {
-  commands="bin/magento module:disable -c Magento_AdminAdobeImsTwoFactorAuth"
-  runCommand "$phpContainer '$commands'"
-}
-
-disableTwoFactorAuth() {
-  commands="bin/magento module:disable -c Magento_TwoFactorAuth"
+MagentoTwoFactorAuthDisable() {
+  commands="bin/magento module:disable -c Magento_AdminAdobeImsTwoFactorAuth Magento_TwoFactorAuth"
   runCommand "$phpContainer '$commands'"
 }
 
@@ -326,7 +321,7 @@ DatabaseImport() {
 }
 
 conposerFunctions() {
-  commands="composer i"
+  commands="composer install --ignore-platform-reqs"
   runCommand "$phpContainer '$commands'"
 }
 
@@ -336,7 +331,7 @@ setNginxVhost() {
 }
 
 composerExtraPackages() {
-  commands="composer req --dev mage2tv/magento-cache-clean"
+  commands="composer req --dev mage2tv/magento-cache-clean && composer req yireo/magento2-webp2"
   runCommand "$phpContainer '$commands'"
 }
 
@@ -348,30 +343,28 @@ magentoConfigImport() {
 magentoConfig() {
   commands="bin/magento config:set web/secure/use_in_frontend 1 && \
   bin/magento config:set web/secure/use_in_adminhtml 1 && \
-  bin/magento config:set catalog/search/enable_eav_indexer 1
-  bin/magento config:set web/seo/use_rewrites 0 && \
+  bin/magento config:set catalog/search/enable_eav_indexer 1 && \
+  bin/magento config:set dev/template/minify_html 0 && \
+  bin/magento config:set dev/js/merge_files 0 && \
+  bin/magento config:set dev/js/enable_js_bundling 0 && \
+  bin/magento config:set dev/js/minify_files 0 && \
+  bin/magento config:set dev/js/move_script_to_bottom 0 && \
+  bin/magento config:set dev/css/merge_css_files 0 && \
+  bin/magento config:set dev/css/minify_files 0 && \
+  bin/magento config:set web/seo/use_rewrites 1 && \
   bin/magento deploy:mode:set -s $DEPLOY_MODE"
-
-  runCommand "$phpContainer '$commands'"
-}
-
-setSMTP() {
-  commands="bin/magento config:set system/smtp/transport smtp && \
-  bin/magento config:set system/smtp/host mailhog && \
-  bin/magento config:set system/smtp/port 1025"
 
   runCommand "$phpContainer '$commands'"
 }
 
 magentoPreInstall() {
   commands="composer create-project --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:${MAGENTO_VERSION} ."
-  # commands="composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=${MAGENTO_VERSION} ."
-  
+  #commands="composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=${MAGENTO_VERSION} ."
   runCommand "$phpContainer '$commands'"
 }
 
 magentoInstall() {
-  commands="bin/magento setup:install --base-url-secure=https://$SHOPURI --base-url=http://$SHOPURI/ \
+  commands="bin/magento setup:install --base-url-secure=https://$SHOPURI/ --base-url=http://$SHOPURI/ \
   --db-host=/var/run/mysqld/mysqld.sock --db-name=$MYSQL_DATABASE --db-user=root --db-password=$MYSQL_ROOT_PASSWORD \
   --backend-frontname=admin --admin-lastname=$ADMIN_NAME --admin-firstname=$ADMIN_SURNAME --admin-email=$ADMIN_EMAIL \
   --admin-user=$ADMIN_USER --admin-password=$ADMIN_PASS \
@@ -379,7 +372,7 @@ magentoInstall() {
   --page-cache=redis --page-cache-redis-server=/run/redis/redis.sock  --page-cache-redis-db=0 \
   --cache-backend=redis --cache-backend-redis-server=/run/redis/redis.sock  --cache-backend-redis-db=1 \
   --session-save=redis --session-save-redis-host=/run/redis/redis.sock --session-save-redis-persistent-id=sess-db2 --session-save-redis-db=2 \
-  --timezone=Europe/Berlin --currency=EUR --language=de_DE \
+  --timezone=Europe/Berlin --currency=EUR \
   --cleanup-database"
 
   runCommand "$phpContainer '$commands'"
@@ -407,5 +400,4 @@ magentoSetup() {
 
   magentoConfigImport
   magentoConfig
-  # setSMTP
 }
