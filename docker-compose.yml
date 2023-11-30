@@ -100,7 +100,7 @@ services:
       timeout: 30s
       retries: 3
     volumes:
-      - db_socket:/var/run/mysqld
+      - db_data:/var/lib/mysql/
       - .docker/mysql/db_dumps:/docker-entrypoint-initdb.d
       - .docker/mysql/config/my.cnf:/etc/mysql/my.cnf
 
@@ -119,7 +119,6 @@ services:
       timeout: 30s
       retries: 3
     volumes:
-      - redis_socket:/run/redis/
       - ./.docker/redis/config/redis.conf:/etc/redis/redis.conf:ro
 
 #  rabbitmq:
@@ -168,5 +167,4 @@ services:
 #      - .docker/varnish/config/default.vcl:/etc/varnish/default.vcl
 
 volumes:
-  redis_socket:
-  db_socket:
+  db_data:
