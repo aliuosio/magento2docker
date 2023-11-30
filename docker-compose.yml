@@ -51,8 +51,6 @@ services:
     volumes:
       - ../magento:/var/www/html:delegated
       - ../.composer:/home/www-data/.composer:delegated
-      - db_socket:/var/run/mysqld
-      - redis_socket:/run/redis/
       - ${HOME}/.ssh:/home/www-data/.ssh:delegated
       - .docker/php/config/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini:ro
       - .docker/php/config/php-ini-overrides.ini:/usr/local/etc/php/conf.d/php-ini-overrides.ini:ro
