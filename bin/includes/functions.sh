@@ -341,8 +341,8 @@ magentoConfigImport() {
 }
 
 magentoConfig() {
-  commands="bin/magento config:set web/secure/use_in_frontend 1 && \
-  bin/magento config:set web/secure/use_in_adminhtml 1 && \
+  commands="bin/magento config:set web/secure/use_in_frontend 0 && \
+  bin/magento config:set web/secure/use_in_adminhtml 0 && \
   bin/magento config:set catalog/search/enable_eav_indexer 1 && \
   bin/magento config:set dev/template/minify_html 0 && \
   bin/magento config:set dev/js/merge_files 0 && \
@@ -358,8 +358,8 @@ magentoConfig() {
 }
 
 magentoPreInstall() {
-  #commands="composer create-project --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:${MAGENTO_VERSION} ."
-  commands="composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=${MAGENTO_VERSION} ."
+  commands="composer create-project --repository-url=https://mirror.mage-os.org/ magento/project-community-edition:${MAGENTO_VERSION} ."
+  # commands="composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=${MAGENTO_VERSION} ."
   runCommand "$phpContainer '$commands'"
 }
 
