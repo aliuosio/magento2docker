@@ -16,6 +16,7 @@ services:
     command: '/usr/sbin/nginx -g "daemon off; error_log /dev/stderr info;"'
     networks:
       default:
+        ipv4_address: 172.21.0.1
         aliases:
           - ${SHOPURI}
     volumes:
@@ -166,3 +167,9 @@ services:
 
 volumes:
   db_data:
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
