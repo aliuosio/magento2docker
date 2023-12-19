@@ -14,11 +14,6 @@ services:
       SHOPURI: ${SHOPURI}
       TZ: ${TZ}
     command: '/usr/sbin/nginx -g "daemon off; error_log /dev/stderr info;"'
-    networks:
-      default:
-        ipv4_address: 172.21.0.1
-        aliases:
-          - ${SHOPURI}
     volumes:
       - ../magento:/var/www/html:delegated
       - .docker/nginx/ssl:/etc/nginx/ssl:ro
@@ -172,4 +167,4 @@ networks:
   default:
     ipam:
       config:
-        - subnet: 172.21.0.0/16
+        - subnet: 172.19.0.0/16
