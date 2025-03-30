@@ -27,6 +27,7 @@ services:
   main:
     container_name: ${NAMESPACE}_main
     image: osioaliu/magento2docker:dev
+    pull_policy: always
     environment:
       TZ: ${TZ}
       HOST_NAME: localhost
@@ -53,13 +54,6 @@ services:
 #    image: mailhog/mailhog:${MAILHOG_VERSION}
 #    ports:
 #      - "8025:8025"
-
-#  watchtower:
-#    container_name: ${NAMESPACE}_watchtower
-#    image: containrrr/watchtower:${WATCHTOWER_VERSION}
-#    volumes:
-#      - /var/run/docker.sock:/var/run/docker.sock
-#    command: --interval 3600
 
 volumes:
   phpsocket:

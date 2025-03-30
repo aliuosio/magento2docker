@@ -13,14 +13,11 @@ do
 	fi
 done
 
-if [ -d "/run/mysqld" ]; then
-	echo "[i] mysqld already present, skipping creation"
-	chown -R mysql:mysql /run/mysqld
-else
-	echo "[i] mysqld not found, creating...."
-	mkdir -p /run/mysqld
-	chown -R mysql:mysql /run/mysqld
-fi
+# Ensure MySQL socket directory exists with proper permissions
+echo "[i] Setting up MySQL socket directory..."
+mkdir -p /run/mysqld /var/run/mysqld
+chown -R mysql:mysql /run/mysqld /var/run/mysqld
+chmod 777 /run/mysqld /var/run/mysqld
 
 if [ -d /var/lib/mysql/mysql ]; then
 	echo "[i] MySQL directory already present, skipping creation"

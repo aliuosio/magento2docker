@@ -73,7 +73,9 @@ RUN apk add --no-cache \
     libjpeg-turbo \
     libpng \
     libzip \
-    libwebp
+    libwebp \
+    icu-dev \
+    icu-libs
 
 # Configure and install PHP extensions
 RUN docker-php-ext-configure hash --with-mhash \
