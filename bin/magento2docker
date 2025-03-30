@@ -13,11 +13,26 @@ setHostConfig() {
 
 image="magento2docker"
 action=$1
-tag=$2
+tag=${2:-latest}  # Use 'latest' as default if no tag is provided
 
 setHostConfig
 if [ "$action" = "build" ]; then
-  docker build -t osioaliu/"$image":"$tag" --build-arg MODE="$tag" .
+  docker build -t osioaliu/"$image":"$tag" \
+    --build-arg MODE="$tag" \
+    --build-arg PHP_VERSION_SET="$PHP_VERSION_SET" \
+    --build-arg MAGENTO_VERSION="$MAGENTO_VERSION" \
+    --build-arg WORKDIR_SERVER="$WORKDIR_SERVER" \
+    --build-arg NGINX_VERSION="$NGINX_VERSION" \
+    --build-arg OPENSEARCH_VERSION="$OPENSEARCH_VERSION" \
+    --build-arg REDIS_PECL_VERSION="$REDIS_PECL_VERSION" \
+    --build-arg APCU_PECL_VERSION="$APCU_PECL_VERSION" \
+    --build-arg FIXUID_VERSION="$FIXUID_VERSION" \
+    --build-arg WEBUSER="$WEBUSER" \
+    --build-arg WEBGROUP="$WEBUSER" .
+  
+  # Automatically push the image to Docker Hub after successful build
+  echo "Pushing osioaliu/$image:$tag to Docker Hub"
+  docker push osioaliu/"$image":"$tag"
 elif [ "$action" = "xdebug" ]; then
   docker exec -it "$image" xdebug
 else

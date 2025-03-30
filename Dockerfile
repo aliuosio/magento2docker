@@ -1,9 +1,16 @@
 ARG MODE=$MODE
-ARG WORKDIR_SERVER=/var/www/html
-ARG MAGENTO_VERSION=2.4.5-p1
+ARG PHP_VERSION_SET
+ARG MAGENTO_VERSION
+ARG WORKDIR_SERVER
+ARG NGINX_VERSION
+ARG OPENSEARCH_VERSION
+ARG REDIS_PECL_VERSION
+ARG APCU_PECL_VERSION
+ARG FIXUID_VERSION
+ARG WEBUSER
+ARG WEBGROUP
 
-
-FROM php:8.1.16-fpm-alpine3.17 as builder
+FROM php:${PHP_VERSION_SET:-8.1.29-fpm-alpine3.19} AS builder
 LABEL maintainer="Osiozekhai Aliu"
 ARG MODE
 ARG WORKDIR_SERVER
@@ -21,39 +28,89 @@ RUN if [ "$MODE" = "latest" ]; then \
 fi
 
 
-FROM php:8.1.16-fpm-alpine3.17
+FROM php:${PHP_VERSION_SET:-8.1.29-fpm-alpine3.19} 
 ARG MODE
 ARG WORKDIR_SERVER
 ARG WEBUSER=www-data
 ARG WEBGROUP=$WEBUSER
 RUN apk update && apk upgrade
-RUN apk add --no-cache --virtual build-dependencies libc-dev libxslt-dev freetype-dev libjpeg-turbo-dev  \
-    libpng-dev libzip-dev libwebp-dev \
-    && apk add --no-cache --virtual .php-deps make \
-    && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS zlib-dev gettext-dev \
-    g++ curl-dev wget ca-certificates gnupg openssl \
-    && apk add --no-cache supervisor pwgen gettext openjdk11 su-exec pcre2-dev bash sudo icu-dev shadow \
-    && docker-php-ext-configure hash --with-mhash \
+# Install build dependencies
+RUN apk add --no-cache --virtual .build-deps \
+    $PHPIZE_DEPS \
+    libc-dev \
+    libxslt-dev \
+    freetype-dev \
+    libjpeg-turbo-dev \
+    libpng-dev \
+    libzip-dev \
+    libwebp-dev \
+    zlib-dev \
+    gettext-dev \
+    g++ \
+    curl-dev \
+    icu-dev \
+    linux-headers
+
+# Install runtime dependencies
+RUN apk add --no-cache \
+    wget \
+    ca-certificates \
+    gnupg \
+    openssl \
+    supervisor \
+    pwgen \
+    gettext \
+    openjdk11 \
+    su-exec \
+    pcre2-dev \
+    bash \
+    sudo \
+    shadow \
+    mariadb \
+    mariadb-client \
+    libxslt \
+    freetype \
+    libjpeg-turbo \
+    libpng \
+    libzip \
+    libwebp
+
+# Configure and install PHP extensions
+RUN docker-php-ext-configure hash --with-mhash \
     && docker-php-ext-configure gd --with-webp --with-jpeg --with-freetype \
-    && docker-php-ext-install gd bcmath intl gettext pdo_mysql soap sockets xsl zip opcache \
-    && pecl channel-update pecl.php.net \
-    && pecl install -o -f redis apcu-5.1.21 \
+    && docker-php-ext-install -j$(nproc) \
+        gd \
+        bcmath \
+        intl \
+        gettext \
+        pdo_mysql \
+        soap \
+        sockets \
+        xsl \
+        zip \
+        opcache
+
+# Install PECL extensions
+ARG REDIS_PECL_VERSION
+ARG APCU_PECL_VERSION
+RUN pecl channel-update pecl.php.net \
+    && pecl install -o -f redis-${REDIS_PECL_VERSION} apcu-${APCU_PECL_VERSION} \
     && docker-php-ext-enable redis apcu \
-    && docker-php-source delete \
-    && echo 'https://dl-cdn.alpinelinux.org/alpine/v3.12/main' >> /etc/apk/repositories \
-    && apk update \
-    && apk add --no-cache mariadb=10.4.25-r0 mariadb-client=10.4.25-r0 mariadb-server-utils=10.4.25-r0 \
-    && apk del --purge .build-deps .build-deps $PHPIZE_DEPS \
+    && docker-php-source delete
+
+# Cleanup
+ARG FIXUID_VERSION
+RUN apk del --no-cache .build-deps \
     && rm -rf /var/cache/apk/* \
     && rm -rf /tmp/* \
-    && addgroup -S elasticsearch \
-    && adduser -S --no-create-home elasticsearch -G elasticsearch \
+    && addgroup -S opensearch \
+    && adduser -S --no-create-home opensearch -G opensearch \
     && addgroup -S redis \
     && adduser -S --no-create-home redis -G redis \
     && addgroup -S nginx \
     && adduser -S --no-create-home nginx -G nginx \
     && echo "JAVA_HOME=/usr/lib/jvm/java-11-openjdk/bin/java" | tee -a /etc/profile \
-    && curl -SsL https://github.com/boxboat/fixuid/releases/download/v0.5.1/fixuid-0.5.1-linux-amd64.tar.gz | tar -C /usr/local/bin -xzf -  \
+    && curl -SsL https://github.com/boxboat/fixuid/releases/download/v${FIXUID_VERSION}/fixuid-${FIXUID_VERSION}-linux-amd64.tar.gz | tar -C /usr/local/bin -xzf -  \
     && chmod 4755 /usr/local/bin/fixuid \
     && mkdir -p /etc/fixuid \
     && usermod -p "" $WEBUSER \
@@ -79,17 +136,19 @@ COPY --from=builder --chown=redis:redis /var/lib/redis /var/lib/redis
 COPY --from=builder --chown=redis:redis /run/redis /run/redis
 COPY --from=builder --chown=redis:redis /usr/bin/redis-server /usr/bin/redis-server
 COPY --from=builder /usr/local/bin/composer /usr/local/bin/composer
-COPY --from=blacktop/elasticsearch:7.5 --chown=elasticsearch:elasticsearch /usr/share/elasticsearch /usr/share/elasticsearch
+# Note: These versions should match OPENSEARCH_VERSION and NGINX_VERSION in .env
+# Docker doesn't support variable substitution in COPY --from statements
+COPY --from=opensearchproject/opensearch:1.3.6 --chown=opensearch:opensearch /usr/share/opensearch /usr/share/opensearch
 
-COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /usr/sbin/nginx /usr/sbin/nginx
-COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /usr/share/nginx /usr/share/nginx
-COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /usr/share/licenses/nginx /usr/share/licenses/nginx
-COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /usr/lib/nginx /usr/lib/nginx
-COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /etc/init.d/nginx /etc/init.d/nginx
-COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /etc/logrotate.d/nginx /etc/logrotate.d/nginx
-COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /etc/nginx /etc/nginx
-COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /var/cache/nginx /var/cache/nginx
-COPY --from=nginx:1.23.3-alpine-slim  --chown=nginx:nginx /var/log/nginx /var/log/nginx
+COPY --from=nginx:1.27.4-alpine-slim  --chown=nginx:nginx /usr/sbin/nginx /usr/sbin/nginx
+COPY --from=nginx:1.27.4-alpine-slim  --chown=nginx:nginx /usr/share/nginx /usr/share/nginx
+COPY --from=nginx:1.27.4-alpine-slim  --chown=nginx:nginx /usr/share/licenses/nginx /usr/share/licenses/nginx
+COPY --from=nginx:1.27.4-alpine-slim  --chown=nginx:nginx /usr/lib/nginx /usr/lib/nginx
+COPY --from=nginx:1.27.4-alpine-slim  --chown=nginx:nginx /etc/init.d/nginx /etc/init.d/nginx
+COPY --from=nginx:1.27.4-alpine-slim  --chown=nginx:nginx /etc/logrotate.d/nginx /etc/logrotate.d/nginx
+COPY --from=nginx:1.27.4-alpine-slim  --chown=nginx:nginx /etc/nginx /etc/nginx
+COPY --from=nginx:1.27.4-alpine-slim  --chown=nginx:nginx /var/cache/nginx /var/cache/nginx
+COPY --from=nginx:1.27.4-alpine-slim  --chown=nginx:nginx /var/log/nginx /var/log/nginx
 COPY .docker/config/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY .docker/config/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY .docker/config/nginx/ssl /etc/nginx/ssl
@@ -108,9 +167,9 @@ COPY .docker/config/mysql/my.cnf  /etc/mysql/my.cnf
 COPY .docker/config/redis/my-redis.conf /etc/my-redis.conf
 COPY .env /usr/local/bin/
 
-RUN chmod +x /usr/share/elasticsearch/bin/elasticsearch \
-    && mkdir -p /usr/share/elasticsearch/jdk/bin/ \
-    && ln -s /usr/bin/java /usr/share/elasticsearch/jdk/bin/java \
+RUN chmod +x /usr/share/opensearch/bin/opensearch \
+    && mkdir -p /usr/share/opensearch/jdk/bin/ \
+    && if [ ! -e /usr/share/opensearch/jdk/bin/java ]; then ln -s /usr/bin/java /usr/share/opensearch/jdk/bin/java; fi \
     && chmod +x -R /usr/local/bin
 
 WORKDIR $WORKDIR_SERVER
