@@ -8,11 +8,11 @@ The main Docker image, osioaliu/magento2docker, includes all necessary applicati
 ## Magento 2 Demo
 ### 1. Run the following command to start the container:
 
-    docker run --rm -dt --name magento2docker osioaliu/magento2docker:latest
+    bin/magento2docker
 
 ### 2. Execute the following command to get Magento 2 IP:
 
-    docker exec -t magento2docker start
+    bin/magento2docker start
 
 
 ## Magento 2 Dev
@@ -20,10 +20,7 @@ If you want to use this setup with your own project, you can use the `docker-com
 This file includes additional containers with Mailhog, Watchtower, and Rabbitmq 
 which you may find useful for your project. These containers are currently commented out.
 
-    git clone https://github.com/aliuosio/magento2docker.git
-    cd magento2docker
-    chmod +x bin/dev
-    bin/dev
+    bin/magento2docker dev
 
 Only the `app/code`, `dev`, `composer.json` foldera are mapped as a volumes due perfomance.
 The rest of the magento files are copied to a folder parralel to htdocs so you can add it as a library to your IDE
