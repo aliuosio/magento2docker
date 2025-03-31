@@ -5,15 +5,14 @@ The main Docker image, osioaliu/magento2docker, includes all necessary applicati
 
 > This setup should not be used on a production server due to security concerns.
 
-## Magento 2 Demo
-### 1. Run the following command to start the container:
 
-    bin/magento2docker
+### on first usage
 
-### 2. Execute the following command to get Magento 2 IP:
+    chmod +x bin/*
+
+### Magento 2 Demo
 
     bin/magento2docker start
-
 
 ## Magento 2 Dev
 If you want to use this setup with your own project, you can use the `docker-compose.yml file. 
