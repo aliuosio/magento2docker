@@ -1,10 +1,9 @@
-version: '3.8'
-
 services:
 
   nginx:
     container_name: ${NAMESPACE}_nginx
     image: nginx:${NGINX_VERSION}
+    pull_policy: always
     networks:
       default:
         aliases:
@@ -38,6 +37,7 @@ services:
       - phpsocket:/var/run
       - ~/.composer:/home/www-data/.composer:delegated
       - app_data:${WORKDIR_SERVER}:delegated
+      - mysql_data:/var/lib/mysql
 
 #  rabbitmq:
 #    container_name: ${NAMESPACE}_rabbitmq
@@ -62,3 +62,4 @@ volumes:
       type: none
       o: bind
       device: ${WORKDIR}
+  mysql_data:

@@ -115,7 +115,76 @@ setContainerPermissions() {
 
 getLogo
 
-sleep 10
+# Ensure MySQL socket directory exists with proper permissions
+echo "[i] Setting up MySQL socket directory..."
+
+# Check if we're running as root
+if [ "$(id -u)" = "0" ]; then
+    echo "[i] Running as root, setting up MySQL socket directories directly"
+    mkdir -p /run/mysqld /var/run/mysqld
+    chown -R mysql:mysql /run/mysqld /var/run/mysqld
+    chmod 777 /run/mysqld /var/run/mysqld
+else
+    echo "[i] Running as non-root user, using sudo to set up MySQL socket directories"
+    # Check if sudo is available
+    if command -v sudo >/dev/null 2>&1; then
+        sudo mkdir -p /run/mysqld /var/run/mysqld
+        sudo chown -R mysql:mysql /run/mysqld /var/run/mysqld
+        sudo chmod 777 /run/mysqld /var/run/mysqld
+    else
+        echo "[!] WARNING: Cannot set up MySQL socket directories. Neither root privileges nor sudo available."
+        echo "[!] MySQL may not function correctly. Consider running the container with -u root"
+    fi
+fi
+
+# Start MySQL manually if not running
+echo "[i] Checking if MySQL is running..."
+if ! pgrep -x mysqld > /dev/null; then
+  echo "[i] MySQL not running, starting MySQL server..."
+  echo "[i] Creating MySQL data directory if it doesn't exist..."
+  mkdir -p /var/lib/mysql
+  chown -R mysql:mysql /var/lib/mysql
+  
+  echo "[i] Starting MySQL with command: /usr/bin/mysqld --user=mysql --console --skip-name-resolve --skip-networking=0"
+  /usr/bin/mysqld --user=mysql --console --skip-name-resolve --skip-networking=0 &
+  
+  # Wait for MySQL to start up
+  echo "[i] Waiting for MySQL to start..."
+  for i in {1..60}; do
+    echo "[i] Attempting to connect to MySQL... ($i/60)"
+    if mysqladmin ping -u root -p"$MYSQL_ROOT_PASSWORD" --silent; then
+      echo "[i] MySQL is up and running!"
+      break
+    fi
+    
+    if [ $i -eq 60 ]; then
+      echo "[!] ERROR: MySQL failed to start after 60 seconds"
+      echo "[!] Checking MySQL error log:"
+      if [ -f /var/log/mysql/error.log ]; then
+        tail -n 20 /var/log/mysql/error.log
+      else
+        echo "[!] MySQL error log not found"
+      fi
+      echo "[!] Checking MySQL process status:"
+      ps aux | grep mysql
+    fi
+    
+    sleep 1
+  done
+else
+  echo "[i] MySQL is already running."
+  echo "[i] MySQL socket status:"
+  ls -la /run/mysqld/ /var/run/mysqld/ 2>/dev/null || echo "Socket directories not found"
+fi
+
+# Verify MySQL connection
+echo "[i] Testing MySQL connection..."
+if mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "SHOW DATABASES;" 2>/dev/null; then
+  echo "[i] MySQL connection successful!"
+else
+  echo "[!] WARNING: Could not connect to MySQL server. This may cause issues with Magento installation."
+fi
+
 FILE_ENV="app/etc/env.php"
 
 if [ -z "$HOST_NAME" ]; then
@@ -125,20 +194,38 @@ if [[ $(dbTablesCount) == 0 ]]; then
   removeMagentoFilesToReinstall
 fi
 if [ -f "composer.json" ]; then
+  echo "[i] Starting composer install..."
   composerInstallPackages
+  echo "[i] Composer install completed."
 else
+  echo "[i] Creating Magento project..."
   createMagentoProject
+  echo "[i] Magento project creation completed."
 fi
+
+echo "[i] Checking for Magento environment file: $FILE_ENV"
 if [[ ! -f "$FILE_ENV" ]]; then
+  echo "[i] Setting container permissions..."
   setContainerPermissions
+  echo "[i] Starting Magento installation..."
   magentoInstall "$HOST_NAME"
+  echo "[i] Disabling Two Factor Auth..."
   bin/magento module:disable -c Magento_TwoFactorAuth
+  echo "[i] Deploying sample data..."
   bin/magento sampledata:deploy
+  echo "[i] Setting performance variables..."
   setPerformanceVars
+  echo "[i] Running setup:upgrade..."
   bin/magento se:up
+  echo "[i] Reindexing..."
   bin/magento ind:rei
+  echo "[i] Flushing cache..."
   bin/magento cache:flush
+  echo "[i] Removing composer cache..."
   removeComposerCache
+  echo "[i] Magento installation completed."
+else
+  echo "[i] Magento environment file already exists, skipping installation."
 fi
 
 setBaseUrl "$HOST_NAME"

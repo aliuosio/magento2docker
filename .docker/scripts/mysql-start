@@ -16,34 +16,46 @@ done
 # Ensure MySQL socket directory exists with proper permissions
 echo "[i] Setting up MySQL socket directory..."
 mkdir -p /run/mysqld /var/run/mysqld
-chown -R mysql:mysql /run/mysqld /var/run/mysqld
 chmod 777 /run/mysqld /var/run/mysqld
 
-if [ -d /var/lib/mysql/mysql ]; then
-	echo "[i] MySQL directory already present, skipping creation"
-	chown -R mysql:mysql /var/lib/mysql
+# Check if running as root
+if [ "$(id -u)" != "0" ]; then
+    echo "[i] Running as non-root user, using sudo to set up MySQL socket directories"
+fi
+
+# Check if MySQL data directory exists
+echo "[i] Checking if MySQL is running..."
+if pgrep mysqld > /dev/null; then
+    echo "[i] MySQL is already running"
 else
-	echo "[i] MySQL data directory not found, creating initial DBs"
+    echo "[i] MySQL not running, starting MySQL server..."
+    
+    # Create data directory with proper permissions
+    echo "[i] Creating MySQL data directory if it doesn't exist..."
+    mkdir -p /var/lib/mysql
+    chmod 777 /var/lib/mysql
+    
+    if [ -d /var/lib/mysql/mysql ]; then
+        echo "[i] MySQL database already initialized"
+    else
+        echo "[i] Initializing MySQL database..."
+        mysql_install_db --user=$(id -u -n) --ldata=/var/lib/mysql > /dev/null || mysql_install_db --ldata=/var/lib/mysql > /dev/null
 
-	chown -R mysql:mysql /var/lib/mysql
+        if [ "$MYSQL_ROOT_PASSWORD" = "" ]; then
+            MYSQL_ROOT_PASSWORD=`pwgen 16 1`
+            echo "[i] MySQL root Password: $MYSQL_ROOT_PASSWORD"
+        fi
 
-	mysql_install_db --user=mysql --ldata=/var/lib/mysql > /dev/null
+        MYSQL_DATABASE=${MYSQL_DATABASE:-""}
+        MYSQL_USER=${MYSQL_USER:-""}
+        MYSQL_PASSWORD=${MYSQL_PASSWORD:-""}
 
-	if [ "$MYSQL_ROOT_PASSWORD" = "" ]; then
-		MYSQL_ROOT_PASSWORD=`pwgen 16 1`
-		echo "[i] MySQL root Password: $MYSQL_ROOT_PASSWORD"
-	fi
+        tfile=`mktemp`
+        if [ ! -f "$tfile" ]; then
+            return 1
+        fi
 
-	MYSQL_DATABASE=${MYSQL_DATABASE:-""}
-	MYSQL_USER=${MYSQL_USER:-""}
-	MYSQL_PASSWORD=${MYSQL_PASSWORD:-""}
-
-	tfile=`mktemp`
-	if [ ! -f "$tfile" ]; then
-	    return 1
-	fi
-
-	cat << EOF > "$tfile"
+        cat << EOF > "$tfile"
 USE mysql;
 FLUSH PRIVILEGES ;
 GRANT ALL ON *.* TO 'root'@'%' identified by '$MYSQL_ROOT_PASSWORD' WITH GRANT OPTION ;
@@ -53,39 +65,38 @@ DROP DATABASE IF EXISTS test ;
 FLUSH PRIVILEGES ;
 EOF
 
-	if [ "$MYSQL_DATABASE" != "" ]; then
-	    echo "[i] Creating database: $MYSQL_DATABASE"
-		if [ "$MYSQL_CHARSET" != "" ] && [ "$MYSQL_COLLATION" != "" ]; then
-			echo "[i] with character set [$MYSQL_CHARSET] and collation [$MYSQL_COLLATION]"
-			echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` CHARACTER SET $MYSQL_CHARSET COLLATE $MYSQL_COLLATION;" >> "$tfile"
-		else
-			echo "[i] with character set: 'utf8' and collation: 'utf8_general_ci'"
-			echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` CHARACTER SET utf8 COLLATE utf8_general_ci;" >> "$tfile"
-		fi
+        if [ "$MYSQL_DATABASE" != "" ]; then
+            echo "[i] Creating database: $MYSQL_DATABASE"
+            if [ "$MYSQL_CHARSET" != "" ] && [ "$MYSQL_COLLATION" != "" ]; then
+                echo "[i] with character set [$MYSQL_CHARSET] and collation [$MYSQL_COLLATION]"
+                echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` CHARACTER SET $MYSQL_CHARSET COLLATE $MYSQL_COLLATION;" >> "$tfile"
+            else
+                echo "[i] with character set: 'utf8' and collation: 'utf8_general_ci'"
+                echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` CHARACTER SET utf8 COLLATE utf8_general_ci;" >> "$tfile"
+            fi
 
-	 if [ "$MYSQL_USER" != "" ]; then
-		echo "[i] Creating user: $MYSQL_USER with password $MYSQL_PASSWORD"
-		echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* to '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD'; FLUSH PRIVILEGES;" >> "$tfile"
-	    fi
-	fi
+            if [ "$MYSQL_USER" != "" ]; then
+                echo "[i] Creating user: $MYSQL_USER with password $MYSQL_PASSWORD"
+                echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* to '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD'; FLUSH PRIVILEGES;" >> "$tfile"
+            fi
+        fi
 
-	/usr/bin/mysqld --user=mysql --bootstrap --verbose=0 --skip-name-resolve --skip-networking=0 < "$tfile"
-	rm -f "$tfile"
+        /usr/bin/mysqld --bootstrap --verbose=0 --skip-name-resolve --skip-networking=0 < "$tfile"
+        rm -f "$tfile"
 
-	for f in /docker-entrypoint-initdb.d/*; do
-		case "$f" in
-			*.sql)    echo "$0: running $f"; /usr/bin/mysqld --user=mysql --bootstrap --verbose=0 --skip-name-resolve --skip-networking=0 < "$f"; echo ;;
-			*.sql.gz) echo "$0: running $f"; gunzip -c "$f" | /usr/bin/mysqld --user=mysql --bootstrap --verbose=0 --skip-name-resolve --skip-networking=0 < "$f"; echo ;;
-			*)        echo "$0: ignoring or entrypoint initdb empty $f" ;;
-		esac
-		echo
-	done
+        for f in /docker-entrypoint-initdb.d/*; do
+            case "$f" in
+                *.sql)    echo "$0: running $f"; /usr/bin/mysqld --bootstrap --verbose=0 --skip-name-resolve --skip-networking=0 < "$f"; echo ;;
+                *.sql.gz) echo "$0: running $f"; gunzip -c "$f" | /usr/bin/mysqld --bootstrap --verbose=0 --skip-name-resolve --skip-networking=0 < "$f"; echo ;;
+                *)        echo "$0: ignoring or entrypoint initdb empty $f" ;;
+            esac
+            echo
+        done
 
-	echo
-	echo 'MySQL init process done. Ready for start up.'
-	echo
-
-	echo "exec /usr/bin/mysqld --user=mysql --console --skip-name-resolve --skip-networking=0" "$@"
+        echo
+        echo 'MySQL init process done. Ready for start up.'
+        echo
+    fi
 fi
 
 # execute any pre-exec scripts
@@ -97,4 +108,6 @@ do
 	fi
 done
 
-exec /usr/bin/mysqld --user=mysql --console --skip-name-resolve --skip-networking=0 "$@"
+# Start MySQL with current user permissions
+echo "[i] Starting MySQL server..."
+exec /usr/bin/mysqld --console --skip-name-resolve --skip-networking=0 "$@"

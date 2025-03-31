@@ -1,0 +1,66 @@
+#!/bin/bash
+
+set -e
+
+umask 0002
+
+declare -a es_opts
+
+while IFS='=' read -r envvar_key envvar_value
+do
+    # OpenSearch env vars need to have at least two dot separated lowercase words, e.g. `cluster.name`
+    if [[ "$envvar_key" =~ ^[a-z0-9_]+\.[a-z0-9_]+ ]]; then
+        if [[ ! -z $envvar_value ]]; then
+          es_opt="-E${envvar_key}=${envvar_value}"
+          es_opts+=("${es_opt}")
+        fi
+    fi
+done < <(env)
+
+# Set Java environment for OpenSearch
+echo "[i] Setting up Java environment for OpenSearch..."
+
+# Check if Java is available and working
+if command -v java >/dev/null 2>&1; then
+    echo "[i] Java is available: $(java -version 2>&1 | head -1)"
+    
+    # Set JAVA_HOME to the actual Java installation directory
+    export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+    echo "[i] JAVA_HOME set to: $JAVA_HOME"
+    
+    # Ensure OpenSearch can find Java
+    export OPENSEARCH_JAVA_HOME=$JAVA_HOME
+    echo "[i] OPENSEARCH_JAVA_HOME set to: $OPENSEARCH_JAVA_HOME"
+    
+    # Create symbolic link if needed
+    if [ ! -e /usr/share/opensearch/jdk/bin/java ]; then
+        echo "[i] Creating symbolic link for Java in OpenSearch directory"
+        mkdir -p /usr/share/opensearch/jdk/bin/
+        ln -sf $(which java) /usr/share/opensearch/jdk/bin/java
+        ls -la /usr/share/opensearch/jdk/bin/java
+    fi
+else
+    echo "[!] ERROR: Java is not available. OpenSearch requires Java to run."
+    echo "[!] Checking installed packages:"
+    apk info | grep -i java
+    exit 1
+fi
+
+export OPENSEARCH_JAVA_OPTS="-Dopensearch.cgroups.hierarchy.override=/ $OPENSEARCH_JAVA_OPTS"
+
+# Make sure OpenSearch directories have proper permissions
+mkdir -p /usr/share/opensearch/data /usr/share/opensearch/logs
+chown -R opensearch:opensearch /usr/share/opensearch/data /usr/share/opensearch/logs
+
+# Add opensearch as command if needed
+if [ "${1:0:1}" = '-' ]; then
+	set -- opensearch "$@"
+fi
+
+# Drop root privileges if we are running opensearch
+# allow the container to be started with `--user`
+if [ "$1" = 'opensearch' -a "$(id -u)" = '0' ]; then
+	set -- su-exec opensearch "$@" "${es_opts[@]}"
+fi
+
+exec "$@"
